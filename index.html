@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bike Fit Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg viewBox="0 0 48 32" aria-hidden="true"><circle cx="10" cy="22" r="8"/><circle cx="38" cy="22" r="8"/><path d="M10 22 L19 8 L33 8 L38 22 M19 8 L24 22 L33 8 M24 22 L10 22 M17 5 h6 M31 4 l3 4"/></svg>
+      <h1>Bike Fit Lab</h1>
+    </div>
+    <div class="topbar-end">
+      <span id="modelStatus" class="pill" role="status" data-i18n="status.loading">Loading pose model…</span>
+      <div class="lang-switch" id="langSwitch" role="group" data-i18n-aria="label.language" aria-label="Language"></div>
+    </div>
+  </header>
+
+  <noscript><p class="toast">Bike Fit Lab runs entirely in your browser and needs JavaScript turned on. ／ Bike Fit Lab 完全在瀏覽器中執行，請開啟 JavaScript。</p></noscript>
+
+  <main class="layout">
+    <section class="stage-col">
+      <div class="stage" id="stage">
+        <canvas id="canvas"></canvas>
+        <div class="placeholder" id="placeholder">
+          <svg class="rider-demo" id="riderDemo" aria-hidden="true" focusable="false"></svg>
+          <p class="big" data-i18n="placeholder.title">Film yourself pedaling from the side</p>
+          <p data-i18n="placeholder.body">Use your camera live or upload a side-view video. Bike Fit Lab draws joint lines and angles on your body, then builds a fit report with adjustment suggestions.</p>
+        </div>
+        <div class="countdown" id="countdown" aria-live="assertive" hidden></div>
+        <div class="rec-badge" id="recBadge" hidden><span class="rec-dot"></span><span id="recText" data-i18n="rec.default">Analyzing</span></div>
+      </div>
+      <div class="calib-bar" id="calibBar" hidden>
+        <p class="calib-msg"><span class="calib-step" id="calibStepNo"></span> <span id="calibText" aria-live="polite"></span></p>
+        <span class="calib-actions">
+          <button id="calibUndo" class="btn small ghost" data-i18n="btn.back">Back</button>
+          <button id="calibSkip" class="btn small ghost" data-i18n="btn.skip">Skip</button>
+          <button id="calibDone" class="btn small" data-i18n="btn.done">Done</button>
+        </span>
+      </div>
+      <video id="video" class="offscreen" playsinline muted></video>
+
+      <div class="toolbar">
+        <div class="tool-group">
+          <button id="btnCamera" class="btn" data-i18n="btn.camera">Use camera</button>
+          <label class="btn" for="fileInput" id="btnUpload" data-i18n="btn.upload">Upload video</label>
+          <input type="file" id="fileInput" accept="video/*" class="offscreen" />
+          <button id="btnCalib" class="btn" disabled data-i18n="btn.calib">Calibrate scale</button>
+        </div>
+        <div class="tool-group end">
+          <button id="btnSnapshot" class="btn ghost" disabled data-i18n="btn.snapshot">Save image</button>
+          <button id="btnStop" class="btn ghost" disabled data-i18n="btn.stop">Stop</button>
+          <button id="btnSession" class="btn primary" disabled data-i18n="btn.startFit">Start fit test</button>
+        </div>
+      </div>
+
+      <div class="file-controls" id="fileControls" hidden>
+        <button id="btnPlay" class="btn small" data-i18n="btn.play">Play</button>
+        <input type="range" id="seek" min="0" max="1" step="0.01" value="0" data-i18n-aria="label.seek" aria-label="Video position" />
+        <span id="timeText" class="mono">0.0 / 0.0 s</span>
+        <label class="inline"><span data-i18n="label.speed">Speed</span>
+          <select id="speed">
+            <option value="1">1×</option>
+            <option value="0.5" selected>0.5×</option>
+            <option value="0.25">0.25×</option>
+          </select>
+        </label>
+      </div>
+      <div id="toast" class="toast" role="alert" hidden>
+        <p id="toastText"></p>
+        <span class="toast-actions">
+          <button id="toastAction" class="btn small" hidden></button>
+          <button id="toastClose" class="btn small ghost" data-i18n="action.dismiss">Dismiss</button>
+        </span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="card">
+        <h2 data-i18n="settings.title">Settings</h2>
+        <label class="field"><span data-i18n="settings.style">Riding style</span>
+          <select id="style">
+            <option value="comfort" data-i18n="style.comfort">Comfort / commuter</option>
+            <option value="endurance" selected data-i18n="style.endurance">Endurance road / gravel</option>
+            <option value="race" data-i18n="style.race">Race / aggressive road</option>
+          </select>
+        </label>
+        <label class="field"><span><span data-i18n="settings.height">Your height (cm)</span> <span class="hint" data-i18n="settings.heightHint">Used to estimate adjustments in mm</span></span>
+          <input type="number" id="height" min="120" max="220" step="1" inputmode="numeric" data-i18n-ph="settings.heightPh" placeholder="e.g. 175" aria-describedby="heightErr" />
+          <span class="field-error" id="heightErr" data-i18n="settings.heightErr" hidden>Enter a height between 120 and 220 cm.</span>
+        </label>
+        <label class="field"><span data-i18n="settings.side">Side facing the camera</span>
+          <select id="side">
+            <option value="auto" selected data-i18n="settings.sideAuto">Detect automatically</option>
+            <option value="left" data-i18n="side.left">Left</option>
+            <option value="right" data-i18n="side.right">Right</option>
+          </select>
+        </label>
+        <label class="field"><span data-i18n="settings.duration">Test length (camera)</span>
+          <select id="duration">
+            <option value="10" data-i18n="settings.seconds" data-i18n-args='{"n":10}'>10 seconds</option>
+            <option value="20" selected data-i18n="settings.seconds" data-i18n-args='{"n":20}'>20 seconds</option>
+            <option value="30" data-i18n="settings.seconds" data-i18n-args='{"n":30}'>30 seconds</option>
+          </select>
+        </label>
+        <label class="check"><input type="checkbox" id="recordVideo" checked /> <span data-i18n="settings.record">Record annotated video</span></label>
+      </div>
+
+      <div class="card">
+        <h2 data-i18n="bike.title">Bike &amp; calibration</h2>
+        <label class="field"><span><span data-i18n="bike.wheel">Front wheel size</span> <span class="hint" data-i18n="bike.wheelHint">Outer tire diameter, used to convert to real mm</span></span>
+          <select id="wheel">
+            <option value="672" data-i18n="bike.wheelOpt" data-i18n-args='{"name":"700×25c","mm":672}'>700×25c (≈ 672 mm)</option>
+            <option value="678" selected data-i18n="bike.wheelOpt" data-i18n-args='{"name":"700×28c","mm":678}'>700×28c (≈ 678 mm)</option>
+            <option value="686" data-i18n="bike.wheelOpt" data-i18n-args='{"name":"700×32c","mm":686}'>700×32c (≈ 686 mm)</option>
+            <option value="702" data-i18n="bike.wheelGravel" data-i18n-args='{"name":"700×40c","mm":702}'>700×40c gravel (≈ 702 mm)</option>
+            <option value="678" data-i18n="bike.wheelOpt" data-i18n-args='{"name":"650b×47","mm":678}'>650b×47 (≈ 678 mm)</option>
+            <option value="706" data-i18n="bike.wheelOpt" data-i18n-args='{"name":"27.5×2.4\"","mm":706}'>27.5×2.4" (≈ 706 mm)</option>
+            <option value="739" data-i18n="bike.wheelOpt" data-i18n-args='{"name":"29×2.3\"","mm":739}'>29×2.3" (≈ 739 mm)</option>
+            <option value="custom" data-i18n="bike.wheelCustom">Custom…</option>
+          </select>
+        </label>
+        <label class="field" id="wheelCustomField" hidden><span data-i18n="bike.customLabel">Custom outer tire diameter (mm)</span>
+          <input type="number" id="wheelCustom" min="400" max="800" step="1" inputmode="numeric" data-i18n-ph="bike.customPh" placeholder="e.g. 680" aria-describedby="wheelCustomErr" />
+          <span class="field-error" id="wheelCustomErr" data-i18n="bike.customErr" hidden>Enter a diameter between 400 and 800 mm.</span>
+        </label>
+        <label class="field"><span data-i18n="bike.crank">Crank length</span>
+          <select id="crank">
+            <option value="160">160 mm</option>
+            <option value="165">165 mm</option>
+            <option value="167.5">167.5 mm</option>
+            <option value="170">170 mm</option>
+            <option value="172.5" selected>172.5 mm</option>
+            <option value="175">175 mm</option>
+          </select>
+        </label>
+        <div class="calib-status" id="calibStatus" aria-live="polite"></div>
+      </div>
+
+      <div class="card">
+        <h2 data-i18n="live.title">Live angles</h2>
+        <dl id="live" class="live"></dl>
+      </div>
+
+      <details class="card tips">
+        <summary data-i18n="tips.title">How to film for accurate results</summary>
+        <ol>
+          <li data-i18n="tips.1"></li>
+          <li data-i18n="tips.2"></li>
+          <li data-i18n="tips.3"></li>
+          <li data-i18n="tips.4"></li>
+          <li data-i18n="tips.5"></li>
+          <li data-i18n="tips.6"></li>
+        </ol>
+      </details>
+    </aside>
+  </main>
+
+  <section id="report" class="report" aria-live="polite" hidden></section>
+
+  <footer class="foot" data-i18n="footer"></footer>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

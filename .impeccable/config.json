@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "pulsing-dot",
+        "value": "*",
+        "files": [
+          "bikeFit/index.html"
+        ],
+        "createdAt": "2026-11-07T02:24:54.648Z",
+        "reason": "Claude: the blinking dot only shows while a fit session is actively capturing/recording, so it reflects a genuinely live state"
+      }
+    ]
+  }
+}

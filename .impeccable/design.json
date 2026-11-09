@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-06T00:00:00Z",
+  "title": "Design System: Bike Fit Lab",
+  "extensions": {
+    "colorMeta": {
+      "fit-mint": { "role": "primary", "displayName": "Fit Mint", "canonical": "#34d399", "tonalRamp": ["#052e1f", "#064e3b", "#047857", "#059669", "#10b981", "#34d399", "#6ee7b7", "#d1fae5"] },
+      "fit-mint-ink": { "role": "primary", "displayName": "Fit Mint Ink", "canonical": "#052e1f" },
+      "fit-mint-hover": { "role": "primary", "displayName": "Fit Mint Hover", "canonical": "#5ee0b0" },
+      "status-amber": { "role": "secondary", "displayName": "Status Amber", "canonical": "#fbbf24", "tonalRamp": ["#451a03", "#78350f", "#b45309", "#d97706", "#f59e0b", "#fbbf24", "#fcd34d", "#fef3c7"] },
+      "status-coral": { "role": "secondary", "displayName": "Status Coral", "canonical": "#f87171", "tonalRamp": ["#450a0a", "#7f1d1d", "#b91c1c", "#dc2626", "#ef4444", "#f87171", "#fca5a5", "#fee2e2"] },
+      "calib-pink": { "role": "tertiary", "displayName": "Calibration Pink", "canonical": "#f472b6", "tonalRamp": ["#500724", "#831843", "#be185d", "#db2777", "#ec4899", "#f472b6", "#f9a8d4", "#fce7f3"] },
+      "studio-black": { "role": "neutral", "displayName": "Studio Black", "canonical": "#0b0f17" },
+      "stage-black": { "role": "neutral", "displayName": "Stage Black", "canonical": "#05070c" },
+      "bench-navy": { "role": "neutral", "displayName": "Bench Navy", "canonical": "#121826" },
+      "bench-navy-raised": { "role": "neutral", "displayName": "Bench Navy Raised", "canonical": "#1a2233" },
+      "hairline-slate": { "role": "neutral", "displayName": "Hairline Slate", "canonical": "#263049" },
+      "chalk-text": { "role": "neutral", "displayName": "Chalk Text", "canonical": "#e6eaf2" },
+      "slate-muted": { "role": "neutral", "displayName": "Slate Muted", "canonical": "#8b95ab", "tonalRamp": ["#0b0f17", "#121826", "#1a2233", "#263049", "#4a5163", "#8b95ab", "#c4cbda", "#e6eaf2"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Report title only." },
+      "headline": { "displayName": "Headline", "purpose": "Wordmark and empty-stage prompt." },
+      "title": { "displayName": "Title", "purpose": "Suggestion card headings." },
+      "body": { "displayName": "Body", "purpose": "Running text and explanations." },
+      "label": { "displayName": "Label", "purpose": "Uppercase card headings, table headers, area labels." },
+      "mono": { "displayName": "Mono", "purpose": "Targets and time readouts, tabular numerals." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "control-state", "value": "background 0.15s, border-color 0.15s", "purpose": "Button hover; removed under prefers-reduced-motion." },
+      { "name": "rec-blink", "value": "blink 1s infinite", "purpose": "Recording dot pulse; static under reduced motion." }
+    ],
+    "breakpoints": [
+      { "name": "phone", "value": "560px" },
+      { "name": "stack", "value": "960px" },
+      { "name": "report-single", "value": "1100px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single filled action per toolbar, e.g. Start fit test.",
+      "html": "<button class=\"ds-btn ds-btn-primary\">Start fit test</button>",
+      "css": ".ds-btn { appearance: none; border: 1px solid #263049; background: #1a2233; color: #e6eaf2; padding: 9px 16px; border-radius: 10px; font: 600 15px/1.6 ui-sans-serif, system-ui, sans-serif; cursor: pointer; transition: background 0.15s, border-color 0.15s; } .ds-btn-primary { background: #34d399; color: #052e1f; border-color: #34d399; } .ds-btn-primary:hover { background: #5ee0b0; } .ds-btn:focus-visible { outline: 2px solid #34d399; outline-offset: 2px; }"
+    },
+    {
+      "name": "Default Button",
+      "kind": "button",
+      "refersTo": "button",
+      "description": "Source and tool actions: Use camera, Upload video, Calibrate scale.",
+      "html": "<button class=\"ds-btn-default\">Use camera</button>",
+      "css": ".ds-btn-default { appearance: none; border: 1px solid #263049; background: #1a2233; color: #e6eaf2; padding: 9px 16px; border-radius: 10px; font: 600 15px/1.6 ui-sans-serif, system-ui, sans-serif; cursor: pointer; transition: background 0.15s, border-color 0.15s; } .ds-btn-default:hover { border-color: #3a4766; background: #212b40; } .ds-btn-default:focus-visible { outline: 2px solid #34d399; outline-offset: 2px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button",
+      "description": "Secondary session actions: Save image, Stop, Dismiss.",
+      "html": "<button class=\"ds-btn-ghost\">Save image</button>",
+      "css": ".ds-btn-ghost { appearance: none; border: 1px solid #263049; background: transparent; color: #e6eaf2; padding: 9px 16px; border-radius: 10px; font: 600 15px/1.6 ui-sans-serif, system-ui, sans-serif; cursor: pointer; transition: background 0.15s, border-color 0.15s; } .ds-btn-ghost:hover { border-color: #3a4766; background: #212b40; } .ds-btn-ghost:focus-visible { outline: 2px solid #34d399; outline-offset: 2px; }"
+    },
+    {
+      "name": "Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Label above, hint on its own line, 16px control text.",
+      "html": "<label class=\"ds-field\"><span>Your height (cm)<span class=\"ds-hint\">Used to estimate adjustments in mm</span></span><input class=\"ds-input\" type=\"number\" placeholder=\"e.g. 175\"></label>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 4px; font: 13px/1.6 ui-sans-serif, system-ui, sans-serif; color: #8b95ab; } .ds-hint { display: block; font-size: 12px; } .ds-input { font: 16px ui-sans-serif, system-ui, sans-serif; color: #e6eaf2; background: #1a2233; border: 1px solid #263049; border-radius: 8px; padding: 8px 10px; } .ds-input::placeholder { color: #8b95ab; } .ds-input:focus-visible { outline: 2px solid #34d399; outline-offset: 2px; }"
+    },
+    {
+      "name": "Language Switch",
+      "kind": "nav",
+      "refersTo": "pill",
+      "description": "EN / 繁中 segmented pill in the top bar.",
+      "html": "<div class=\"ds-lang\"><button aria-pressed=\"true\">EN</button><button aria-pressed=\"false\">繁中</button></div>",
+      "css": ".ds-lang { display: inline-flex; padding: 2px; border: 1px solid #263049; border-radius: 999px; background: #121826; } .ds-lang button { appearance: none; border: 0; background: transparent; color: #8b95ab; font: 600 13px ui-sans-serif, system-ui, sans-serif; padding: 3px 10px; border-radius: 999px; cursor: pointer; } .ds-lang button:hover { color: #e6eaf2; } .ds-lang button[aria-pressed=\"true\"] { background: #1a2233; color: #e6eaf2; }"
+    },
+    {
+      "name": "Status Chips",
+      "kind": "chip",
+      "refersTo": "chip-good",
+      "description": "good / close / bad status, always with a text label.",
+      "html": "<span class=\"ds-chip ds-good\">Good</span> <span class=\"ds-chip ds-close\">Close</span> <span class=\"ds-chip ds-bad\">Adjust</span>",
+      "css": ".ds-chip { display: inline-block; font: 700 12px ui-sans-serif, system-ui, sans-serif; padding: 2px 8px; border-radius: 999px; } .ds-good { background: rgba(52,211,153,0.18); color: #34d399; } .ds-close { background: rgba(251,191,36,0.18); color: #fbbf24; } .ds-bad { background: rgba(248,113,113,0.18); color: #f87171; }"
+    },
+    {
+      "name": "Suggestion Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Prioritised adjustment with area, title, reason and action.",
+      "html": "<div class=\"ds-sugg\"><div class=\"ds-area\"><span class=\"ds-prio\">P1</span> Saddle</div><h3>Raise the saddle</h3><p>Knee at the bottom of the stroke is 132°, target 140–150°.</p><p class=\"ds-action\">Raise the saddle about 5 mm</p></div>",
+      "css": ".ds-sugg { background: #121826; border: 1px solid #263049; border-radius: 12px; padding: 14px 16px; font: 15px/1.6 ui-sans-serif, system-ui, sans-serif; color: #e6eaf2; } .ds-area { display: flex; gap: 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: #8b95ab; } .ds-prio { font-weight: 700; color: #f87171; } .ds-sugg h3 { font-size: 17px; margin: 2px 0 6px; line-height: 1.2; } .ds-sugg p { margin: 0 0 8px; color: #c4cbda; } .ds-action { font-weight: 600; color: #e6eaf2 !important; margin: 0 !important; } .ds-action::before { content: '→ '; color: #34d399; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Fit Studio Bench",
+    "overview": "Bike Fit Lab looks like the measuring bench in a professional fit studio after the lights go down: a near-black room where the only bright things are the rider's skeleton lines, the joint angles and the one action that matters next. The interface steps back so the data can step forward. Chrome is dark navy, separated by hairline borders rather than shadows, and colour is spent almost entirely on meaning: mint for in-range and for the primary action, amber for close, coral for out of range.\n\nIt is a tool, not a showcase. Density is comfortable rather than airy, numbers are tabular, and every label is short enough to read from a bike saddle a few metres away. The components are precise and restrained: thin borders, no ornament, one filled button per screen.",
+    "keyCharacteristics": [
+      "Dark, single-theme studio surface (no light theme on screen; print switches to white).",
+      "Hairline-bordered flat cards on tonal navy layers; no drop shadows.",
+      "Colour is semantic first: mint / amber / coral status, plus a reserved pink for calibration.",
+      "System sans for everything, monospace with tabular numerals for measured values.",
+      "The video stage is the hero; side panel and report are quiet supporting surfaces."
+    ],
+    "rules": [
+      { "name": "The Meaning-Only Colour Rule", "body": "Saturated colour appears only as status, the primary action, or calibration. Decorative colour is not allowed.", "section": "colors" },
+      { "name": "The Pink Is Calibration Rule", "body": "Calibration pink is reserved for the calibration flow so the rider always knows they are placing reference points.", "section": "colors" },
+      { "name": "The Tabular Numbers Rule", "body": "Every measured number uses tabular numerals so values do not jitter while the live view updates.", "section": "typography" },
+      { "name": "The 16px Field Rule", "body": "Form controls render text at 16px so iOS Safari never zooms on focus.", "section": "typography" },
+      { "name": "The Hairline, Not Shadow Rule", "body": "Separate surfaces with a tonal step and a 1px border, never a drop shadow.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep the page dark (studio black #0b0f17) and let the video stage be the brightest, most saturated area.",
+      "Do reserve fit mint for the single primary action, focus, and \"in range\".",
+      "Do pair every status colour with a text label or chip text.",
+      "Do use tabular numerals for every measured value.",
+      "Do separate surfaces with a tonal step and a 1px hairline-slate border."
+    ],
+    "donts": [
+      "Don't add drop shadows, gradients or glassmorphism to cards or buttons.",
+      "Don't use calibration pink outside the calibration flow.",
+      "Don't put more than one mint-filled button in the same toolbar or card.",
+      "Don't overlay controls on the video stage where they could cover the bike or rider.",
+      "Don't introduce web fonts; the system stack is what keeps the Traditional Chinese and English text consistent."
+    ]
+  }
+}
