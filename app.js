@@ -570,7 +570,7 @@ function endSession(showReport) {
   updateButtons();
   if (wasCollecting && showReport) {
     state.lastSamples = state.samples;
-    state.lastShots = { bottom: state.best.img, front: state.front.img };
+    state.lastShots = { bottom: state.best.img, front: state.front.img, portrait: canvas.height > canvas.width };
     renderReport();
   }
 }
@@ -723,7 +723,7 @@ function renderReport({ scroll = true } = {}) {
             <thead><tr><th>${t('report.colMeasure')}</th><th>${t('report.colYours')}</th><th>${t('report.colTarget')}</th><th></th></tr></thead>
             <tbody>${rows}</tbody>
           </table>
-          ${snaps ? `<div class="snaps">${snaps}</div>` : ''}
+          ${snaps ? `<div class="snaps${shots.portrait ? ' portrait' : ''}">${snaps}</div>` : ''}
         </div>
         <div class="card">
           <h2>${t('report.chart')}</h2>

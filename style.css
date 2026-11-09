@@ -96,6 +96,10 @@ h1, h2, h3 { margin: 0; line-height: 1.2; }
 .chart-legend { display: flex; gap: 16px; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
 .chart-legend span { display: inline-flex; align-items: center; gap: 6px; }
 .chart-legend i { width: 14px; height: 2px; border-radius: 2px; display: inline-block; }
+.chart-legend { flex-wrap: wrap; row-gap: 2px; }
+.chart-legend .legend-band { display: none; }
+.chart-wrap.narrow .chart-legend .legend-band { display: inline-flex; }
+.chart-legend .legend-band i { height: 10px; border-radius: 2px; background: rgba(52, 211, 153, 0.18); }
 .chart-tip {
   position: absolute; pointer-events: none; background: #0b0f17; border: 1px solid var(--border); border-radius: 8px;
   padding: 6px 10px; font-size: 13px; white-space: nowrap; transform: translate(-50%, -110%);
@@ -298,4 +302,52 @@ p, li, .help { text-wrap: pretty; }
 @media print {
   .verdict-title, .verdict.all-good .verdict-title { color: #111; }
   .verdict-sub, .verdict-strip { color: #4a5163; }
+}
+
+/* ---------- Phones & narrow tablets ---------- */
+@media (max-width: 960px) {
+  /* Empty stage sizes to its content instead of a 16:9 box that clips the copy on narrow screens. */
+  .stage:has(> .placeholder:not([hidden])) { aspect-ratio: auto; }
+  .stage:has(> .placeholder:not([hidden])) .placeholder { position: static; padding: 28px 20px; }
+  .stage:has(> .placeholder:not([hidden])) .rider-demo { display: block; width: min(220px, 70%); }
+}
+@media (max-width: 560px) {
+  .topbar { flex-wrap: nowrap; }
+  .brand { gap: 10px; min-width: 0; }
+  .brand svg { width: 34px; height: 24px; flex: none; }
+  .brand h1 { font-size: 18px; white-space: nowrap; }
+  .topbar-end { flex-wrap: nowrap; gap: 8px; }
+  /* "Ready" is implied by the enabled buttons; keep it for screen readers, free the row for the brand. Loading and errors stay visible. */
+  .pill.ok { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .lang-switch button { padding: 7px 12px; }
+
+  .layout { padding: 12px 16px; gap: 16px; }
+  /* Leave room under portrait footage for the toolbar, so the primary action is on screen without scrolling. */
+  .stage.portrait { width: min(100%, calc(62svh * var(--ar))); }
+
+  /* Two even columns of thumb-sized buttons; the primary action lands bottom-right. */
+  .toolbar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .tool-group { display: contents; }
+  .toolbar .btn { display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 12px; text-align: center; line-height: 1.25; }
+
+  .file-controls { gap: 8px 12px; }
+  .file-controls input[type=range] { order: -1; flex: 1 0 100%; height: 32px; margin: 0; }
+  .file-controls .btn { min-height: 40px; min-width: 72px; }
+  .file-controls .inline { margin-left: auto; }
+  .inline select { font-size: 16px; padding: 6px 8px; }
+
+  .btn.small { min-height: 40px; }
+  .calib-actions { margin-left: 0; width: 100%; }
+  .calib-actions .btn { flex: 1; }
+  .toast-actions { width: 100%; justify-content: flex-end; }
+
+  .report-head h2 { font-size: 21px; }
+  .report-actions { display: grid; grid-template-columns: 1fr 1fr; align-items: stretch; }
+  .report-actions #recordingSlot { display: contents; }
+  .report-actions .muted-note { grid-column: 1 / -1; }
+  .report-actions .btn { display: flex; align-items: center; justify-content: center; min-height: 44px; text-align: center; }
+  .fitdata { grid-template-columns: 1fr 1fr; }
+  /* Portrait snapshots stay side by side; stacked they would each fill the screen. */
+  .snaps.portrait { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .foot { padding: 16px 16px 28px; }
 }

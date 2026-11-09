@@ -8,12 +8,16 @@ const SERIES = [
   { key: 'h', label: 'chart.hip', color: '#d06a1c' },
 ];
 const M = { l: 40, r: 12, t: 26, b: 30 };
+const NARROW = 520;
 const CLOCK = [[0, 12], [90, 3], [180, 6], [270, 9], [360, 12]];
 
 /** Placeholder markup; mountCharts() draws the SVG once the element has a width. */
 export function curveChart(curve) {
   const data = curve.map((b) => ({ d: b.deg, k: Math.round(b.knee), h: Math.round(b.hip) }));
-  const legend = SERIES.map((s) => `<span><i style="background:${s.color}"></i>${t(s.label)}</span>`).join('');
+  // The target band's name moves into the legend on narrow charts, where in-plot it would sit on the knee peak label.
+  const legend =
+    SERIES.map((s) => `<span><i style="background:${s.color}"></i>${t(s.label)}</span>`).join('') +
+    `<span class="legend-band"><i></i>${t('chart.band')}</span>`;
   return `<div class="chart-wrap" data-curve='${JSON.stringify(data)}'>
     <div class="chart-legend">${legend}</div>
     <div class="chart-plot"></div>
@@ -45,7 +49,7 @@ function svgFor(data, W) {
     })
     .join('');
   const band = `<rect x="${M.l}" width="${W - M.l - M.r}" y="${y(150)}" height="${y(140) - y(150)}" class="band"/>
-    <text x="${M.l + 6}" y="${y(150) - 6}" class="band-label">${t('chart.band')}</text>`;
+    ${W < NARROW ? '' : `<text x="${M.l + 6}" y="${y(150) - 6}" class="band-label">${t('chart.band')}</text>`}`;
   const lines = SERIES.map((s) => {
     const d = data.map((p, i) => `${i ? 'L' : 'M'}${x(p.d).toFixed(1)},${y(p[s.key]).toFixed(1)}`).join('');
     // Direct label above each series' peak (the two lines meet at 12 o'clock, so the line ends collide).
@@ -69,6 +73,7 @@ function draw(wrap) {
   const W = Math.round(plot.clientWidth);
   if (!W || W === wrap._w) return;
   wrap._w = W;
+  wrap.classList.toggle('narrow', W < NARROW);
   const data = JSON.parse(wrap.dataset.curve);
   const { html, x } = svgFor(data, W);
   plot.innerHTML = html;
