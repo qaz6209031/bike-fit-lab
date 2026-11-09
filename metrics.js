@@ -153,7 +153,10 @@ export function fitCircle(points) {
   if (kept.length >= 12 && kept.length < points.length) c = fitCircleOnce(kept) ?? c;
   const used = kept.length >= 12 ? kept : points;
   const bins = new Set(used.map((p) => Math.floor(((Math.atan2(p.y - c.y, p.x - c.x) + Math.PI) / (2 * Math.PI)) * 12) % 12));
-  return { ...c, rms: rms(resid(used, c)), coverage: bins.size / 12 };
+  return { ...c, rms: rms(resid(used, c)), coverage: bins.size / 12, n: used.length };
 }
 
-export const circleUsable = (c) => !!c && c.coverage >= 0.75 && c.rms / c.r < 0.2;
+// Many points around the whole circle pin the centre down even when each point is noisy
+// (e.g. a small rider in portrait phone footage), so allow more scatter there.
+export const circleUsable = (c) =>
+  !!c && c.coverage >= 0.75 && c.rms / c.r < (c.n >= 150 && c.coverage >= 0.9 ? 0.25 : 0.2);

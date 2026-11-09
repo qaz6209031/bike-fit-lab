@@ -57,10 +57,12 @@ h1, h2, h3 { margin: 0; line-height: 1.2; }
 
 .stage {
   position: relative; background: #05070c; border: 1px solid var(--border);
-  border-radius: var(--radius); overflow: hidden; aspect-ratio: 16 / 9;
+  border-radius: var(--radius); overflow: hidden; aspect-ratio: var(--ar, 16 / 9);
   display: grid; place-items: center;
 }
-.stage canvas { width: 100%; height: 100%; object-fit: contain; display: block; }
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; }
+/* Portrait footage: as tall as the viewport allows, centred in the column. */
+.stage.portrait { width: min(100%, calc(80svh * var(--ar))); margin-inline: auto; }
 .placeholder { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; padding: 24px; color: var(--muted); max-width: 560px; margin: auto; }
 .placeholder .big { color: var(--text); font-size: 20px; font-weight: 600; margin: 0 0 6px; }
 .countdown {

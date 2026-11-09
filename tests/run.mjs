@@ -16,6 +16,30 @@ const cases = {
     assert.ok(r.notes.some((n) => n.id === 'noteCrankOk'), 'crank radius matches setting');
     assert.ok(r.curve && r.curve.length === 24);
   },
+  'follow-cam: bike drifts and grows in frame → stabilized, same result as fixed camera'() {
+    const fixed = analyzeSession(sim({ noise: 2 }).out, {});
+    const s = sim({ noise: 2 });
+    // Camera pans 900 px, bobs vertically, and the rider grows 30% as they approach.
+    const moved = s.out.map((f, i) => {
+      const u = i / s.out.length;
+      const k = 0.8 + 0.3 * u, dx = -500 + 900 * u, dy = 60 * Math.sin(u * 7);
+      const pts = {};
+      for (const [key, p] of Object.entries(f.pts)) pts[key] = { x: p.x * k + dx, y: p.y * k + dy, v: p.v };
+      return { ...f, pts };
+    });
+    const r = analyzeSession(moved, { calib: calibFrom(s, true, 0) });
+    assert.equal(r.moving, true);
+    assert.equal(fixed.moving, false);
+    assert.ok(r.notes.some((n) => n.id === 'noteMoving'));
+    assert.equal(r.scale.source, 'crank', 'calibration ignored, pedal circle used');
+    assert.equal(r.bbSource, 'auto');
+    assert.ok(Math.abs(r.cadence - 90) < 3, `cadence ${r.cadence}`);
+    assert.equal(r.metrics.find((m) => m.key === 'hipRock').status, 'na', 'hip bounce not guessed');
+    for (const k of ['kneeMax', 'kneeMin', 'torso', 'kops']) {
+      assert.ok(Math.abs(get(r, k) - get(fixed, k)) < 1.5, `${k}: ${get(r, k)} vs ${get(fixed, k)}`);
+    }
+    assert.ok(!r.suggestions.some((x) => x.id === 'hipRock'), 'no phantom hip rock');
+  },
   'no calibration → auto BB + crank-based scale'() {
     const r = analyzeSession(sim({ noise: 2 }).out, {});
     assert.equal(r.scale.source, 'crank');

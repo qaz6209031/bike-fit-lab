@@ -14,6 +14,7 @@ const MODEL_URL =
   'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task';
 const SLOW_MODEL_MS = 15000;
 const LONG_VIDEO_S = 90;
+const MAX_CANVAS_PX = 1280;
 
 const $ = (id) => document.getElementById(id);
 const video = $('video');
@@ -298,6 +299,9 @@ function stopSource() {
   state.fileUrl = null;
   state.source = null;
   $('placeholder').hidden = false;
+  fitStage(0, 0);
+  canvas.width = 300;
+  canvas.height = 150;
   riderDemo.start();
   $('fileControls').hidden = true;
   renderLiveEmpty();
@@ -343,13 +347,31 @@ function detect(ts) {
   }
 }
 
+// The stage takes the footage's shape, so portrait phone video is shown whole instead of cropped.
+function fitStage(w, h) {
+  const stage = $('stage');
+  if (!w || !h) {
+    stage.style.removeProperty('--ar');
+    stage.classList.remove('portrait');
+    return;
+  }
+  stage.style.setProperty('--ar', `${w} / ${h}`);
+  stage.classList.toggle('portrait', h > w);
+}
+
 function processFrame() {
-  const W = video.videoWidth;
-  const H = video.videoHeight;
-  if (!W || !H) return;
+  const VW = video.videoWidth;
+  const VH = video.videoHeight;
+  if (!VW || !VH) return;
+  // Work at most 1280 px on the long side: phone footage is often 4K, which would make every
+  // frame copy, snapshot and recording needlessly heavy. Pose detection reads the video directly.
+  const k = Math.min(1, MAX_CANVAS_PX / Math.max(VW, VH));
+  const W = Math.round(VW * k);
+  const H = Math.round(VH * k);
   if (canvas.width !== W || canvas.height !== H) {
     canvas.width = W;
     canvas.height = H;
+    fitStage(W, H);
   }
   ctx.drawImage(video, 0, 0, W, H);
   const cfg = settings();
@@ -389,17 +411,23 @@ function processFrame() {
   if (state.trail.length > 45) state.trail.shift();
   if (m.confidence >= 0.5) {
     state.footForwardPeak = Math.max(state.footForwardPeak * 0.995, m.footForward);
-    state.ballBuf.push({ x: raw.ball.x, y: raw.ball.y });
+    // Keep the pedal position both in image space and relative to the hands, so the bottom bracket
+    // can still be found when the camera follows a moving bike.
+    state.ballBuf.push({ x: raw.ball.x, y: raw.ball.y, rx: raw.ball.x - raw.wrist.x, ry: raw.ball.y - raw.wrist.y });
     if (state.ballBuf.length > 150) state.ballBuf.shift();
   }
 
   // Bottom bracket: clicked during calibration, otherwise fitted live from the pedal path.
   state.frameNo += 1;
   if (!cal.bb && state.frameNo % 10 === 0) {
-    const c = fitCircle(state.ballBuf);
-    state.liveCircle = circleUsable(c) ? c : null;
+    const fixed = fitCircle(state.ballBuf);
+    const rel = fitCircle(state.ballBuf.map((b) => ({ x: b.rx, y: b.ry })));
+    const ratio = (c) => (circleUsable(c) ? c.rms / c.r : Infinity);
+    const best = ratio(rel) < ratio(fixed) * 0.8 ? { ...rel, relative: true } : fixed;
+    state.liveCircle = circleUsable(best) ? best : null;
   }
-  const bb = cal.bb ?? state.liveCircle;
+  const lc = state.liveCircle;
+  const bb = cal.bb ?? (lc?.relative ? { x: pts.wrist.x + lc.x, y: pts.wrist.y + lc.y } : lc);
   const crankR = cal.pxPerMm ? cfg.crankMm * cal.pxPerMm : state.liveCircle?.r ?? null;
   let crank = null;
   if (bb && crankR) crank = crankAngle(rotatePt(pts.ball, -cal.roll), rotatePt(bb, -cal.roll), md.dir);

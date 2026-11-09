@@ -205,6 +205,7 @@ const en = {
   'a.noteRoll': 'Camera tilted {deg}°; leveled automatically.',
   'a.noteCrankOff': 'The measured pedal path radius is {m} mm, {d}% off the {c} mm cranks you set. Check that the camera faces the bike square-on, that the wheel and crank settings are right, and that the calibration points were placed accurately.',
   'a.noteCrankOk': 'Check passed: the measured pedal path radius, {m} mm, matches the {c} mm cranks you set ({d}% difference).',
+  'a.noteMoving': 'The camera or bike moved during this video, so every frame was lined up on your hands on the bars. Joint angles are unaffected; calibration clicks were ignored, the mm scale comes from the pedal circle, and hip bounce is not measured. For the most accurate fit, film on an indoor trainer with the camera fixed.',
   'a.noteNoBB': 'No complete pedal circle was detected, so knee-over-pedal is estimated. Record at least 3 full revolutions, or click the bottom bracket during calibration.',
   'a.noteNoScale': 'No scale yet, so nothing can be converted to millimeters. Calibrate with the front wheel, or enter your height.',
   'a.noteHeightScale': 'The scale is estimated from your height, the least accurate source. Calibrate with the front wheel for better millimeter figures.',
@@ -226,6 +227,7 @@ const en = {
   'm.kopsHelpEst': '+ means the knee is ahead of the ball of the foot (estimated).',
   'm.hipRock': 'Hip bounce',
   'm.hipRockHelp': 'Rocking hips usually mean the saddle is too high.',
+  'm.hipRockMovingHelp': "Not measured: the camera moved, so small hip movements can't be separated from camera shake.",
   'm.ankleRange': 'Ankle range of motion',
   'm.ankleRangeHelp': 'Lots of ankle movement can hide a saddle that is too high.',
 
@@ -481,6 +483,7 @@ const zh = {
   'a.noteRoll': '相機傾斜 {deg}°，已自動校正水平。',
   'a.noteCrankOff': '量到的踩踏軌跡半徑 {m} mm，與設定的曲柄 {c} mm 相差 {d}%。請確認相機正對側面、輪徑與曲柄設定正確，以及校正點是否點準。',
   'a.noteCrankOk': '驗證：量到的踩踏軌跡半徑 {m} mm，與設定的曲柄 {c} mm 相符（差 {d}%）。',
+  'a.noteMoving': '這段影片中相機或腳踏車有移動，因此改以握在把手上的雙手為基準，把每一格對齊。關節角度不受影響；校正點選已忽略，mm 比例改由踩踏圈推算，髖部晃動則不予測量。想要最準確的結果，請在室內訓練台上以固定相機拍攝。',
   'a.noteNoBB': '沒有偵測到完整的踩踏圈，「膝蓋對踏板」改用估算方式。請至少錄 3 圈以上的完整踩踏，或在校正時手動點選五通。',
   'a.noteNoScale': '尚未校正比例，無法換算 mm。建議用「校正比例」點選前輪，或輸入身高。',
   'a.noteHeightScale': '目前用身高推算比例，誤差較大。用「校正比例」點選前輪可得到更準確的 mm 數。',
@@ -502,6 +505,7 @@ const zh = {
   'm.kopsHelpEst': '+ 代表膝蓋在前腳掌前方（估算）。',
   'm.hipRock': '髖部上下晃動',
   'm.hipRockHelp': '髖部搖擺通常代表坐墊太高。',
+  'm.hipRockMovingHelp': '未測量：相機有移動，細微的髖部晃動無法和相機晃動區分。',
   'm.ankleRange': '腳踝活動範圍',
   'm.ankleRangeHelp': '腳踝動作太大可能是在掩飾坐墊過高。',
 

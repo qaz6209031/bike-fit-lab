@@ -61,6 +61,43 @@ function formatRange([lo, hi], unit) {
   return `≤ ${hi}${unit}`;
 }
 
+const rollingMedian = (arr, i, half) => median(arr.slice(Math.max(0, i - half), i + half + 1));
+const bodyLen = (p) => dist(p.shoulder, p.hip) + dist(p.hip, p.knee) + dist(p.knee, p.ankle);
+const POINT_KEYS = ['shoulder', 'elbow', 'wrist', 'hip', 'knee', 'ankle', 'heel', 'toe', 'ball'];
+
+/**
+ * Footage filmed outdoors or with a hand-held / following camera: the bike drifts across the frame and
+ * grows or shrinks as it nears the camera. Detect that, then map every frame into one reference frame
+ * anchored on the hands (they hold the bars, so they move with the bike) and scaled by body length
+ * (constant in a side view). On a fixed trainer shot this is a no-op.
+ */
+export function stabilize(samples) {
+  const n = samples.length;
+  if (n < 30) return { samples, moving: false };
+  const ax = samples.map((s) => s.pts.wrist.x);
+  const ay = samples.map((s) => s.pts.wrist.y);
+  const len = samples.map((s) => bodyLen(s.pts));
+  const L0 = median(len);
+  if (!(L0 > 0)) return { samples, moving: false };
+  const spread = Math.max(percentile(ax, 95) - percentile(ax, 5), percentile(ay, 95) - percentile(ay, 5)) / L0;
+  const sizeChange = percentile(len, 95) / percentile(len, 5);
+  if (spread < 0.12 && sizeChange < 1.08) return { samples, moving: false };
+
+  const A0 = { x: median(ax), y: median(ay) };
+  const out = samples.map((s, i) => {
+    // Light smoothing on the anchor (pose jitter), heavier on the scale (it changes slowly).
+    const A = { x: rollingMedian(ax, i, 2), y: rollingMedian(ay, i, 2) };
+    const k = L0 / rollingMedian(len, i, 15);
+    const pts = {};
+    for (const key of POINT_KEYS) {
+      const p = s.pts[key];
+      pts[key] = { x: A0.x + (p.x - A.x) * k, y: A0.y + (p.y - A.y) * k, v: p.v };
+    }
+    return { ...s, pts };
+  });
+  return { samples: out, moving: true };
+}
+
 function estimateCadence(samples) {
   const sorted = [...samples].sort((a, b) => a.t - b.t);
   const ys = sorted.map((s) => s.footY);
@@ -94,10 +131,12 @@ export const SCALE_SOURCES = {
  * @param opts     { style, heightCm, crankMm, calib: { pxPerMm, roll, bb, saddle, bar } }
  */
 export function analyzeSession(samples, { style = 'endurance', heightCm = null, crankMm = 172.5, calib = {} } = {}) {
+  const stab = stabilize(samples.filter((s) => s.confidence >= 0.5));
+  // Calibration clicks belong to a single frame; once the bike moves they no longer line up.
+  if (stab.moving) calib = {};
   const roll = calib.roll ?? 0;
   const lv = (p) => (p ? rotatePt(p, -roll) : null);
-  const good = samples
-    .filter((s) => s.confidence >= 0.5)
+  const good = stab.samples
     .map((s) => {
       const p = levelPoints(s.pts, roll);
       return { p, t: s.t, ...computeMetrics(p) };
@@ -138,6 +177,7 @@ export function analyzeSession(samples, { style = 'endurance', heightCm = null, 
   const bbSource = bbManual ? 'manual' : bb ? 'auto' : null;
   const crankPx = pxPerMm ? crankMm * pxPerMm : circleOk ? circle.r : null;
 
+  if (stab.moving) note('noteMoving');
   if (Math.abs(roll) > (1 * Math.PI) / 180) note('noteRoll', { deg: ((roll * 180) / Math.PI).toFixed(1) });
   if (scaleSource === 'wheel' && circleOk) {
     const measured = circle.r / pxPerMm;
@@ -156,7 +196,8 @@ export function analyzeSession(samples, { style = 'endurance', heightCm = null, 
   const shoulder = median(col('shoulder'));
   const elbow = median(col('elbow'));
   const ankleRange = percentile(col('ankle'), 95) - percentile(col('ankle'), 5);
-  const hipRock = ((percentile(col('hipY'), 95) - percentile(col('hipY'), 5)) / thigh) * 100;
+  // With a moving camera, a few mm of hip bounce can't be told apart from camera shake: don't guess.
+  const hipRock = stab.moving ? NaN : ((percentile(col('hipY'), 95) - percentile(col('hipY'), 5)) / thigh) * 100;
 
   // ---- Crank-angle based measurements ----
   let curve = null;
@@ -231,7 +272,7 @@ export function analyzeSession(samples, { style = 'endurance', heightCm = null, 
     metric('shoulder', shoulder, R.shoulder, '°'),
     metric('elbow', elbow, R.elbow, '°'),
     metric('kops', kops, kopsSpec, kopsSpec.unit, kopsMethod === 'crank' ? 'm.kopsHelpCrank' : 'm.kopsHelpEst', 1),
-    metric('hipRock', hipRock, { range: [null, 8], tol: 4 }, t('unit.pctThigh'), undefined, 1),
+    metric('hipRock', hipRock, { range: [null, 8], tol: 4 }, t('unit.pctThigh'), stab.moving ? 'm.hipRockMovingHelp' : undefined, 1),
     metric('ankleRange', ankleRange, { range: [10, 40], tol: 8 }, '°'),
   ];
 
@@ -248,6 +289,7 @@ export function analyzeSession(samples, { style = 'endurance', heightCm = null, 
     metrics,
     scale: { source: scaleSource, pxPerMm },
     bbSource,
+    moving: stab.moving,
     kopsMethod,
     curve,
     bike,
@@ -280,7 +322,7 @@ function buildSuggestions(m, { heightDeltaMm, kopsInCm, saddleHeight }) {
     add('saddleUp', 1, 'saddleHeight', t('s.saddleUpBody', { v: v('kneeMax') }),
       mmStep(heightDeltaMm, 'verb.raise') + saddleTarget(heightDeltaMm));
   } else if (m.kneeMax.dir === 'high') {
-    add('saddleDown', 1, 'saddleHeight', t('s.saddleDownBody', { v: v('kneeMax'), rock: m.hipRock.status !== 'good' }),
+    add('saddleDown', 1, 'saddleHeight', t('s.saddleDownBody', { v: v('kneeMax'), rock: m.hipRock.status === 'close' || m.hipRock.status === 'bad' }),
       mmStep(heightDeltaMm, 'verb.lower') + saddleTarget(heightDeltaMm));
   } else if (m.hipRock.status === 'bad') {
     add('hipRock', 2, 'saddleHeight', t('s.hipRockBody', { v: v('kneeMax'), pct: m.hipRock.value.toFixed(1) }),
