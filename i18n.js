@@ -119,10 +119,6 @@ const en = {
   'about.good2': 'Saddle fore-aft, from where your knee sits over the pedal',
   'about.good3': 'Reach and bar height, from your back, shoulder and elbow angles',
   'about.good4': 'Whether your cranks may be too long',
-  'about.proTitle': 'When a professional fitter is worth it',
-  'about.pro1': 'Pain, numbness or an injury that does not go away',
-  'about.pro2': 'Cleat position, foot problems or a leg-length difference',
-  'about.pro3': 'Choosing a frame size before you buy a bike',
   footer: 'Values are estimates from 2D pose tracking: a starting point for adjustment, not a replacement for a professional fit. Change one thing at a time, in small steps, and stop if anything hurts.',
 
   'canvas.noRider': 'No rider detected: get your whole body in frame',
@@ -427,10 +423,6 @@ const zh = {
   'about.good2': '坐墊前後：看膝蓋和踏板的相對位置',
   'about.good3': '把手距離與高度：看背部、肩膀和手肘角度',
   'about.good4': '曲柄是否可能太長',
-  'about.proTitle': '這些情況值得找專業 fitter',
-  'about.pro1': '疼痛、麻木，或一直好不了的傷',
-  'about.pro2': '卡踏位置、足部問題或長短腳',
-  'about.pro3': '買車前要決定車架尺寸',
   footer: '數值來自 2D 姿勢追蹤估算，是調整的起點，無法取代專業 Fit。一次只調一項、小幅調整，若有任何疼痛請停止。',
 
   'canvas.noRider': '未偵測到騎士——請讓全身入鏡',
