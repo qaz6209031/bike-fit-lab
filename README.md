@@ -13,6 +13,16 @@ python3 -m http.server 8765
 
 The camera needs `localhost` or HTTPS. Any static host works for deployment (Vercel, GitHub Pages, Netlify).
 
+### Chinese page (`/zh/`)
+
+`zh/index.html` is generated from `index.html` and the zh-TW strings so search engines can index the Chinese text. After editing `index.html` or `i18n.js`, run:
+
+```sh
+node tools/build-zh.mjs
+```
+
+The English page sends visitors who chose Chinese (or whose browser is in Chinese) to `/zh/`; the language switch changes the language in place and updates the URL.
+
 ## How it works
 
 | File | Role |

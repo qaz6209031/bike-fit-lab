@@ -19,6 +19,15 @@
           "index.html"
         ],
         "createdAt": "2026-11-10T00:27:31.818Z"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-11-10T19:44:40.761Z",
+        "reason": "Claude: static scan of the How it works steps; they have 12px top padding under the rule, and the rendered-page scan does not flag them"
       }
     ]
   }

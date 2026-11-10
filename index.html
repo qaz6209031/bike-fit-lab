@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-page-lang="en">
 <head>
   <!-- Google tag (Google Analytics: visit counts only; no video or body data is ever sent) -->
   <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-KHLQQ28Z"></script>
@@ -13,10 +13,20 @@
   <title>Free Bike Fit: free online bike fit from a phone video</title>
   <meta name="description" content="Free online bike fit from a phone video. Film yourself pedaling from the side and get your knee, hip, back and arm angles, plus saddle height, setback and reach adjustments." />
   <link rel="canonical" href="https://freebikefit.com/" />
+  <link rel="alternate" hreflang="en" href="https://freebikefit.com/" />
+  <link rel="alternate" hreflang="zh-Hant" href="https://freebikefit.com/zh/" />
+  <link rel="alternate" hreflang="x-default" href="https://freebikefit.com/" />
+  <!-- Visitors who chose Chinese, or whose browser is in Chinese, get the Chinese page. -->
+  <script id="langRedirect">
+    try {
+      var saved = localStorage.getItem('bikefit.lang');
+      if (saved === 'zh-TW' || (!saved && /^zh/i.test(navigator.language || ''))) location.replace('/zh/' + location.search + location.hash);
+    } catch (e) { /* storage blocked: stay on English */ }
+  </script>
   <meta name="theme-color" content="#e9ebee" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="icon" href="icon-192.png" type="image/png" sizes="192x192" />
-  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Free Bike Fit" />
@@ -50,7 +60,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
   <header class="topbar">
@@ -244,6 +254,6 @@
     <p data-i18n="footer.analytics">This site uses Google Analytics to count visits. Your video is never sent anywhere.</p>
   </footer>
 
-  <script type="module" src="app.js"></script>
+  <script type="module" src="/app.js"></script>
 </body>
 </html>

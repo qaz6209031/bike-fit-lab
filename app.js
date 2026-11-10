@@ -5,7 +5,7 @@ import { analyzeSession, liveRanges, rate, SCALE_SOURCES } from './analysis.js';
 import { drawOverlay, drawMessage, drawCalibration } from './draw.js';
 import { curveChart, mountCharts } from './chart.js';
 import { mountRiderDemo } from './rider-demo.js';
-import { t, getLang, setLang, onLangChange, applyStatic, LANGS, DICTS } from './i18n.js';
+import { t, getLang, setLang, onLangChange, applyStatic, LANGS, DICTS, PAGE_URLS } from './i18n.js';
 
 // Usage events for Google Analytics (no-op when GA is blocked or not loaded). Never send video or body data.
 const track = (name, params = {}) => { try { window.gtag?.('event', name, params); } catch { /* analytics must never break the app */ } };
@@ -1294,7 +1294,13 @@ document.addEventListener('keydown', (e) => {
 });
 $('langSwitch').addEventListener('click', (e) => {
   const b = e.target.closest('button[data-lang]');
-  if (b && b.dataset.lang !== getLang()) setLang(b.dataset.lang);
+  if (!b || b.dataset.lang === getLang()) return;
+  setLang(b.dataset.lang);
+  // Switch in place (a loaded video or report survives), then show the URL of that language's page.
+  const url = PAGE_URLS[b.dataset.lang];
+  if (url && document.documentElement.dataset.pageLang && location.pathname !== url) {
+    history.replaceState(history.state, '', url + location.search + location.hash);
+  }
 });
 onLangChange(retranslate);
 

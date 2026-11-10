@@ -692,7 +692,12 @@ export const LANGS = [
 const KEY = 'bikefit.lang';
 
 /** Saved choice, else the browser's languages (any Chinese → zh-TW), else English. */
+// Each language has its own URL so search engines can index both; the page pins its language.
+export const PAGE_URLS = { en: '/', 'zh-TW': '/zh/' };
+
 export function detectLang() {
+  const pinned = globalThis.document?.documentElement?.dataset?.pageLang;
+  if (pinned && DICTS[pinned]) return pinned;
   try {
     const saved = globalThis.window?.localStorage?.getItem(KEY);
     if (saved && DICTS[saved]) return saved;
