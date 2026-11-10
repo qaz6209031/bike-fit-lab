@@ -15,8 +15,11 @@ const MODEL_URL =
 const SLOW_MODEL_MS = 15000;
 const LONG_VIDEO_S = 90;
 const MAX_CANVAS_PX = 1280;
-// About 27 pedal strokes at 80 rpm: enough for stable stroke extremes. "Finish now" ends a test early.
-const CAMERA_TEST_S = 20;
+// A test ends by itself once it has enough clean pedal strokes for stable stroke extremes
+// (about 15 s at 80 rpm), never before MIN_TEST_S and never after MAX_TEST_S.
+const TARGET_STROKES = 20;
+const MIN_TEST_S = 8;
+const MAX_TEST_S = 45;
 
 const $ = (id) => document.getElementById(id);
 const video = $('video');
@@ -373,16 +376,19 @@ function stopSource() {
 
 function updateButtons() {
   const busy = state.phase !== 'idle';
-  $('btnSession').disabled = !state.source || !state.landmarker || busy || state.calibStep >= 0;
-  $('btnSession').textContent = t(state.source === 'file' ? 'btn.analyzeVideo' : 'btn.startFit');
-  $('btnSnapshot').disabled = !state.source;
-  $('btnStop').disabled = !state.source;
-  $('btnStop').textContent = t(busy ? 'btn.finishNow' : 'btn.stop');
+  // One button runs the test: start, and while a test runs, cancel it.
+  const session = $('btnSession');
+  session.disabled = !state.source || !state.landmarker || state.calibStep >= 0;
+  session.textContent = t(busy ? 'btn.cancelTest' : state.source === 'file' ? 'btn.analyzeVideo' : 'btn.startFit');
+  session.classList.toggle('primary', !busy);
+  // The camera button doubles as the off switch, so there is no separate Stop.
   $('btnCamera').disabled = busy || state.cameraStarting;
+  $('btnCamera').textContent = t(state.source === 'camera' ? 'btn.cameraOff' : 'btn.camera');
   // Upload is a <label>: disabling its input blocks the picker; aria-disabled carries the state to the label.
   $('fileInput').disabled = busy;
   $('btnUpload').setAttribute('aria-disabled', String(busy));
   $('btnCalib').disabled = !state.source || busy || state.calibStep >= 0;
+  $('testHint').hidden = !state.source || busy;
 }
 
 // ---------- Frame loop ----------
@@ -524,6 +530,12 @@ function processFrame() {
       state.best = { knee: m.knee, img: canvas.toDataURL('image/jpeg', 0.85) };
     }
     state.sessionKneeMax = Math.max(state.sessionKneeMax, md.knee);
+    countStroke(md.knee);
+    const elapsed = (performance.now() - state.sessionStart) / 1000;
+    if (state.strokes.n >= TARGET_STROKES && elapsed >= MIN_TEST_S) {
+      endSession(true);
+      return;
+    }
     if (crank != null) {
       const err = Math.abs(crank - 90);
       if (err < state.front.err - 0.3) state.front = { err, ff: state.front.ff, img: canvas.toDataURL('image/jpeg', 0.85) };
@@ -535,6 +547,27 @@ function processFrame() {
   if (performance.now() - state.lastLiveUpdate > 120) {
     state.lastLiveUpdate = performance.now();
     renderLive(md, status, side, m.confidence, crank);
+  }
+}
+
+/**
+ * One pedal stroke = the knee angle swinging from the bent half of its range to the extended half.
+ * The range comes from the last ~3 s, so it adapts to each rider; tiny ranges (not pedaling) never count.
+ */
+function countStroke(knee) {
+  const k = state.strokes;
+  k.knees.push(knee);
+  if (k.knees.length > 90) k.knees.shift();
+  if (k.knees.length < 20) return;
+  const lo = Math.min(...k.knees);
+  const hi = Math.max(...k.knees);
+  if (hi - lo < 25) return;
+  const mid = (hi + lo) / 2;
+  const band = (hi - lo) * 0.25;
+  if (knee < mid - band) k.low = true;
+  else if (k.low && knee > mid + band) {
+    k.low = false;
+    k.n += 1;
   }
 }
 
@@ -580,7 +613,6 @@ function startSession() {
       cd.innerHTML = `<span class="cd-n">${t('countdown.go')}</span>`;
       state.timers.push(setTimeout(() => (cd.hidden = true), 700));
       beginCollect(cfg);
-      state.timers.push(setTimeout(() => endSession(true), CAMERA_TEST_S * 1000));
     }, 1000);
     state.timers.push(iv);
   } else {
@@ -603,6 +635,7 @@ function beginCollect(cfg) {
   state.best = { knee: -1, img: null };
   state.front = { err: Infinity, ff: -Infinity, img: null };
   state.sessionKneeMax = 0;
+  state.strokes = { n: 0, knees: [], low: false };
   state.sessionStart = performance.now();
   state.recordUnsupported = false;
   // A new run never shows the previous run's video.
@@ -612,10 +645,11 @@ function beginCollect(cfg) {
   $('recBadge').hidden = false;
   const tick = () => {
     const s = (performance.now() - state.sessionStart) / 1000;
-    $('recText').textContent =
-      state.source === 'camera'
-        ? t('rec.remaining', { s: Math.max(0, CAMERA_TEST_S - s).toFixed(0) })
-        : t('rec.elapsed', { s: s.toFixed(0) });
+    const n = Math.min(state.strokes.n, TARGET_STROKES);
+    $('recText').textContent = t('rec.strokes', { n, total: TARGET_STROKES });
+    $('recBar').style.width = `${(n / TARGET_STROKES) * 100}%`;
+    // Safety cap: a rider who stops pedaling still gets a report from what was captured.
+    if (s >= MAX_TEST_S) endSession(true);
   };
   tick();
   state.timers.push(setInterval(tick, 250));
@@ -1058,7 +1092,7 @@ function retranslate() {
 
 // ---------- Wire up ----------
 
-$('btnCamera').onclick = startCamera;
+$('btnCamera').onclick = () => (state.source === 'camera' ? stopSource() : startCamera());
 $('fileInput').onchange = (e) => {
   loadFile(e.target.files[0]);
   e.target.value = '';
@@ -1072,19 +1106,7 @@ $('btnUpload').addEventListener('keydown', (e) => {
     if (!$('fileInput').disabled) $('fileInput').click();
   }
 });
-$('btnSession').onclick = startSession;
-$('btnStop').onclick = () => (state.phase !== 'idle' ? endSession(true) : stopSource());
-$('btnSnapshot').onclick = () => {
-  if (!canvas.width || !canvas.height) return toast('err.snapshot');
-  canvas.toBlob((blob) => {
-    if (!blob) return toast('err.snapshot');
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `bike-fit-${Date.now()}.png`;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-  }, 'image/png');
-};
+$('btnSession').onclick = () => (state.phase !== 'idle' ? endSession(false) : startSession());
 $('btnPlay').onclick = () => {
   if (video.paused) {
     video.playbackRate = settings().speed;

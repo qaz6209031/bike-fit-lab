@@ -29,7 +29,7 @@
 
   <section class="intro" aria-labelledby="introTitle">
     <h2 id="introTitle" data-i18n="intro.title">A bike fit from a phone video, free.</h2>
-    <p><span data-i18n="intro.lede"></span> <a href="#about" data-i18n="intro.more">Why it is free</a></p>
+    <p><span data-i18n="intro.lede"></span> <span class="intro-links"><a href="#how" data-i18n="intro.how">How it works</a><a href="#about" data-i18n="intro.more">Why it is free</a></span></p>
   </section>
 
   <noscript><p class="toast">Free Bike Fit runs entirely in your browser and needs JavaScript turned on. ／ Free Bike Fit 完全在瀏覽器中執行，請開啟 JavaScript。</p></noscript>
@@ -44,7 +44,7 @@
           <p data-i18n="placeholder.body">Use your camera live or upload a side-view video. Free Bike Fit draws joint lines and angles on your body, then builds a fit report with adjustment suggestions.</p>
         </div>
         <div class="countdown" id="countdown" aria-live="assertive" hidden></div>
-        <div class="rec-badge" id="recBadge" hidden><span class="rec-dot"></span><span id="recText" data-i18n="rec.default">Analyzing</span></div>
+        <div class="rec-badge" id="recBadge" role="status" hidden><span class="rec-dot"></span><span id="recText" data-i18n="rec.default">Analyzing</span><span class="rec-bar" aria-hidden="true"><i id="recBar"></i></span></div>
       </div>
       <div class="calib-bar" id="calibBar" hidden>
         <p class="calib-msg"><span class="calib-step" id="calibStepNo"></span> <span id="calibText" aria-live="polite"></span></p>
@@ -64,11 +64,11 @@
           <button id="btnCalib" class="btn" disabled data-i18n="btn.calib">Calibrate scale</button>
         </div>
         <div class="tool-group end">
-          <button id="btnSnapshot" class="btn ghost" disabled data-i18n="btn.snapshot">Save image</button>
-          <button id="btnStop" class="btn ghost" disabled data-i18n="btn.stop">Stop</button>
           <button id="btnSession" class="btn primary" disabled data-i18n="btn.startFit">Start fit test</button>
         </div>
       </div>
+
+      <p class="test-hint" id="testHint" data-i18n="hint.autoStop" hidden>The test stops by itself after 20 pedal strokes.</p>
 
       <div class="file-controls" id="fileControls" hidden>
         <button id="btnPlay" class="btn small" data-i18n="btn.play">Play</button>
@@ -166,6 +166,23 @@
   </main>
 
   <section id="report" class="report" aria-live="polite" hidden></section>
+
+  <section class="about how" id="how" aria-labelledby="howTitle">
+    <div class="about-sheet how-sheet">
+      <div class="how-lead">
+        <h2 id="howTitle" data-i18n="how.title">How it works</h2>
+        <p data-i18n="how.intro"></p>
+      </div>
+      <ol class="how-steps">
+          <li><h3 data-i18n="how.s1t"></h3><p data-i18n="how.s1"></p></li>
+          <li><h3 data-i18n="how.s2t"></h3><p data-i18n="how.s2"></p></li>
+          <li><h3 data-i18n="how.s3t"></h3><p data-i18n="how.s3"></p></li>
+          <li><h3 data-i18n="how.s4t"></h3><p data-i18n="how.s4"></p></li>
+          <li><h3 data-i18n="how.s5t"></h3><p data-i18n="how.s5"></p></li>
+      </ol>
+      <p class="how-limit" data-i18n="how.limit"></p>
+    </div>
+  </section>
 
   <section class="about" id="about" aria-labelledby="aboutTitle">
     <div class="about-sheet">

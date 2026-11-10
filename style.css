@@ -96,12 +96,15 @@ h1, h2, h3, h4 { margin: 0; line-height: 1.2; }
   position: absolute; inset: 0; display: grid; place-content: center; text-align: center;
   font-size: 128px; font-weight: 800; line-height: 1; color: #fff; background: rgba(0, 0, 0, 0.5);
 }
-.countdown small { display: block; margin-top: 10px; font-stretch: 100%; font-size: 18px; font-weight: 500; }
+.countdown small { display: block; margin: 12px auto 0; max-width: 22em; padding: 0 16px; font-stretch: 100%; font-size: 18px; font-weight: 500; line-height: 1.35; }
 .rec-badge {
   position: absolute; top: 12px; right: 12px; display: flex; align-items: center; gap: 8px;
   background: rgba(0, 0, 0, 0.75); color: #fff; padding: 5px 12px; border-radius: 999px; font-size: 13.5px; font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
+.rec-bar { width: 64px; height: 5px; border-radius: 3px; background: rgba(255, 255, 255, 0.25); overflow: hidden; }
+.rec-bar i { display: block; height: 100%; width: 0; background: var(--tape); transition: width 0.25s ease-out; }
+.test-hint { margin: 10px 0 0; font-size: 14px; color: var(--muted); max-width: 70ch; }
 .rec-dot { width: 9px; height: 9px; border-radius: 50%; background: #ef4444; animation: blink 1s infinite; }
 @keyframes blink { 50% { opacity: 0.25; } }
 
@@ -303,6 +306,21 @@ input[aria-invalid="true"] { border-color: var(--bad); }
 @media (max-width: 860px) { .about-sheet { grid-template-columns: 1fr; padding: 22px 18px; } }
 @media (max-width: 960px) { .about { padding: 0 16px; } }
 
+/* How it works: a real sequence, so the steps are numbered. */
+.how-sheet { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.4fr); }
+.how-lead p { margin: 0; max-width: 46ch; font-size: 16.5px; line-height: 1.6; color: #3a424b; }
+.how-steps { list-style: none; margin: 0; padding: 0; counter-reset: how; }
+.how-steps li { counter-increment: how; display: grid; grid-template-columns: 34px minmax(0, 1fr); column-gap: 12px; padding: 12px 0; border-top: 1px solid var(--rule); }
+.how-steps li:first-child { border-top: 0; padding-top: 0; }
+.how-steps li::before { content: counter(how); grid-row: span 2; font-stretch: 75%; font-size: 32px; font-weight: 800; line-height: 0.95; }
+.how-steps h3 { margin: 0 0 3px; }
+.how-steps p { margin: 0; max-width: 66ch; color: #3a424b; }
+.how-limit { grid-column: 1 / -1; margin: 0; font-size: 14px; color: var(--muted); max-width: 90ch; }
+.about + .about { margin-top: 14px; }
+@media (max-width: 860px) { .how-sheet { grid-template-columns: 1fr; } }
+.intro-links { display: inline-flex; flex-wrap: wrap; gap: 4px 16px; margin-left: 4px; }
+.how { scroll-margin-top: 16px; }
+
 /* ---------- Chart ---------- */
 .chart-wrap { position: relative; margin-top: 4px; }
 .chart-plot { width: 100%; min-height: 200px; }
@@ -355,6 +373,7 @@ p, li, .help { text-wrap: pretty; }
 
 @media (prefers-reduced-motion: reduce) {
   .rec-dot, .countdown .cd-n, .countdown.go .cd-n, .gauge .needle { animation: none; }
+  .rec-bar i { transition: none; }
   .btn { transition: none; }
 }
 
