@@ -1,5 +1,5 @@
 ---
-name: Bike Fit Lab
+name: Free Bike Fit
 description: Free in-browser dynamic bike fit from a side-view pedaling video.
 colors:
   alloy: "#e9ebee"
@@ -89,7 +89,7 @@ components:
     height: "26px"
 ---
 
-# Design System: Bike Fit Lab
+# Design System: Free Bike Fit
 
 ## Overview
 

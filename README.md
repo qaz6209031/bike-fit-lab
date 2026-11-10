@@ -1,4 +1,4 @@
-# Bike Fit Lab
+# Free Bike Fit
 
 Browser-based dynamic bike fit. Film yourself pedalling from the side (live camera or uploaded video), see joint lines and angles drawn on your body, and get a fit report with adjustment suggestions.
 

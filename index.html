@@ -3,7 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bike Fit Lab</title>
+  <title>Free Bike Fit: a bike fit from your phone video</title>
+  <link rel="canonical" href="https://freebikefit.com/" />
+  <meta property="og:title" content="Free Bike Fit" />
+  <meta property="og:description" content="Film yourself pedaling and get saddle, reach and crank adjustments. Free, in your browser." />
+  <meta property="og:url" content="https://freebikefit.com/" />
+  <meta property="og:type" content="website" />
   <meta name="description" content="Free bike fit from a phone video. Measure your knee, hip, back and arm angles while pedaling and get saddle, reach and crank adjustments. Runs in your browser." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -14,7 +19,7 @@
   <header class="topbar">
     <div class="brand">
       <svg viewBox="0 0 48 32" aria-hidden="true"><circle cx="10" cy="22" r="8"/><circle cx="38" cy="22" r="8"/><path d="M10 22 L19 8 L33 8 L38 22 M19 8 L24 22 L33 8 M24 22 L10 22 M17 5 h6 M31 4 l3 4"/></svg>
-      <h1>Bike Fit Lab</h1>
+      <h1>Free Bike Fit</h1>
     </div>
     <div class="topbar-end">
       <span id="modelStatus" class="pill" role="status" data-i18n="status.loading">Loading pose model…</span>
@@ -27,7 +32,7 @@
     <p><span data-i18n="intro.lede"></span> <a href="#about" data-i18n="intro.more">Why it is free</a></p>
   </section>
 
-  <noscript><p class="toast">Bike Fit Lab runs entirely in your browser and needs JavaScript turned on. ／ Bike Fit Lab 完全在瀏覽器中執行，請開啟 JavaScript。</p></noscript>
+  <noscript><p class="toast">Free Bike Fit runs entirely in your browser and needs JavaScript turned on. ／ Free Bike Fit 完全在瀏覽器中執行，請開啟 JavaScript。</p></noscript>
 
   <main class="layout">
     <section class="stage-col">
@@ -36,7 +41,7 @@
         <div class="placeholder" id="placeholder">
           <svg class="rider-demo" id="riderDemo" aria-hidden="true" focusable="false"></svg>
           <p class="big" data-i18n="placeholder.title">Film yourself pedaling from the side</p>
-          <p data-i18n="placeholder.body">Use your camera live or upload a side-view video. Bike Fit Lab draws joint lines and angles on your body, then builds a fit report with adjustment suggestions.</p>
+          <p data-i18n="placeholder.body">Use your camera live or upload a side-view video. Free Bike Fit draws joint lines and angles on your body, then builds a fit report with adjustment suggestions.</p>
         </div>
         <div class="countdown" id="countdown" aria-live="assertive" hidden></div>
         <div class="rec-badge" id="recBadge" hidden><span class="rec-dot"></span><span id="recText" data-i18n="rec.default">Analyzing</span></div>

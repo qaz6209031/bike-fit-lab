@@ -12,7 +12,7 @@ Amateur cyclists worldwide who want to fit their own bike without paying for an 
 
 ## Product Purpose
 
-Bike Fit Lab turns a short side-view video of someone pedalling into a dynamic bike fit: it draws joint lines and angles on the rider, measures the fit over a whole pedal stroke, and tells them what to adjust, in what order, and by roughly how many millimetres. Success is a rider who can make a correct, safe adjustment on their own and verify it with a follow-up session.
+Free Bike Fit turns a short side-view video of someone pedalling into a dynamic bike fit: it draws joint lines and angles on the rider, measures the fit over a whole pedal stroke, and tells them what to adjust, in what order, and by roughly how many millimetres. Success is a rider who can make a correct, safe adjustment on their own and verify it with a follow-up session.
 
 ## Positioning
 
