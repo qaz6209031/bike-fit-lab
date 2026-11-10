@@ -1,6 +1,17 @@
 // Turns a session of per-frame metrics into fit measurements + adjustment suggestions.
 // Target ranges are common starting points used in static/dynamic bike fitting,
 // not hard rules — flexibility, injuries and goals change what is "right".
+// Evidence checked against 2021–2025 literature (Nov 2026):
+// - kneeMax: dynamic knee flexion of about 30–40° at full extension (Ferrer-Roca 2012; Bini & Priego-Quesada 2022
+//   review favours dynamic measurement; Martínez & Pérez 2025: > 40° flexion linked with more knee pain;
+//   Bini et al. 2025: 30–43° proposed, depends on measuring method). Kept at 140–150°.
+// - kneeMin: knee range of motion while pedalling is 75 ± 7° (BMC Musculoskelet Disord 2021, 31 adults),
+//   so with 145° at the bottom a typical top-of-stroke angle is about 63–77°. Lowered from 65° to 60°.
+// - ankleRange: 27 ± 10° in the same 2021 study. 10–40° kept.
+// - kops: reviews find no evidence for knee-over-pedal as a precise target (Husband et al. 2024;
+//   saddle-position umbrella review 2024). Widened so only large offsets are flagged.
+// - torso, hip, shoulder, elbow, hipRock: no 2021–2025 study gives target values (Husband et al. 2024 found no clear
+//   recommendations); these remain practitioner rules of thumb (e.g. Burt 2014).
 
 import { t } from './i18n.js';
 import { computeMetrics, levelPoints, rotatePt, crankAngle, fitCircle, circleUsable, dist } from './metrics.js';
@@ -19,7 +30,7 @@ export function liveRanges(style) {
   const s = STYLES[style] ?? STYLES.endurance;
   return {
     kneeMax: { range: [140, 150], tol: 5 },
-    kneeMin: { range: [65, null], tol: 5 },
+    kneeMin: { range: [60, null], tol: 5 },
     hipMin: { range: [s.hipMin, null], tol: 5 },
     torso: { range: s.torso, tol: 5 },
     shoulder: { range: s.shoulder, tol: 7 },
@@ -250,7 +261,7 @@ export function analyzeSession(samples, { style = 'endurance', heightCm = null, 
 
   const cadence = estimateCadence(good);
   const R = liveRanges(style);
-  const kopsSpec = kopsInCm ? { range: [-2, 2], tol: 2, unit: ' cm' } : { range: [-5, 5], tol: 4, unit: t('unit.pctShank') };
+  const kopsSpec = kopsInCm ? { range: [-3, 3], tol: 2, unit: ' cm' } : { range: [-8, 8], tol: 4, unit: t('unit.pctShank') };
 
   const metric = (key, value, spec, unit, helpKey = `m.${key}Help`, decimals = 0) => ({
     key,
