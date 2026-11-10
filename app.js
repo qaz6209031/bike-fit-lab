@@ -637,21 +637,83 @@ function fmt(m) {
 const statusText = (s) => (s === 'na' ? '–' : t(`status.${s}`));
 const prioText = (p) => t(`prio.${Math.min(p, 3)}`);
 
-// One-line verdict above the report: a status strip (one dot per rated measure) plus a headline in the
-// app's coaching voice. The all-in-range case gets the only celebratory treatment in the app.
-function verdictHtml(res) {
+const noColon = (s) => s.replace(/[:：]\s*$/, '');
+
+/** A measurement laid on a strip of tape: ticks, the target band in yellow, the rider's value as the needle. */
+function gaugeHtml(m) {
+  const [lo, hi] = m.range;
+  const tol = m.tol || 5;
+  const v = Number.isFinite(m.value) ? m.value : null;
+  const bandLo = lo ?? hi - 4 * tol;
+  const bandHi = hi ?? lo + 4 * tol;
+  const pad = Math.max((bandHi - bandLo) * 0.5, tol * 1.5);
+  let min = bandLo - pad;
+  let max = bandHi + pad;
+  if (lo == null && (v == null || v >= 0)) min = Math.min(0, bandLo); // "≤ x" scales start at zero
+  if (v != null) {
+    min = Math.min(min, v - tol * 0.6);
+    max = Math.max(max, v + tol * 0.6);
+  }
+  const pct = (x) => ((x - min) / (max - min)) * 100;
+  const step = [0.5, 1, 2, 5, 10, 20].find((s) => (max - min) / s <= 30) ?? 20;
+  const ticks = [];
+  for (let x = Math.ceil(min / step) * step; x <= max; x += step) {
+    const major = Math.round(x / step) % 5 === 0;
+    const p = pct(x).toFixed(2);
+    ticks.push(`<line x1="${p}" x2="${p}" y1="0" y2="${major ? 11 : 6}"${major ? ' class="major"' : ''} vector-effect="non-scaling-stroke"/>`);
+  }
+  const left = lo == null ? 0 : pct(bandLo);
+  const right = hi == null ? 100 : pct(bandHi);
+  const band = `<span class="band${lo == null ? ' open-lo' : ''}${hi == null ? ' open-hi' : ''}" style="left:${left}%;width:${right - left}%"></span>`;
+  const needle =
+    v == null ? '' : `<span class="needle" style="left:${pct(v)}%;--from:${(left + right) / 2}%"></span>`;
+  return `<div class="gauge" aria-hidden="true">
+      <svg class="ticks" viewBox="0 0 100 26" preserveAspectRatio="none">${ticks.join('')}</svg>${band}${needle}
+    </div>`;
+}
+
+/** Big figure, small unit: "146°", "+1.9 cm", "3.2 % of thigh". */
+function gaugeValue(m) {
+  if (!Number.isFinite(m.value)) return '–';
+  const v = m.value.toFixed(m.decimals);
+  const sign = m.key === 'kops' && m.value > 0 ? '+' : '';
+  return m.unit === '°' ? `${sign}${v}°` : `${sign}${v}<small> ${m.unit}</small>`;
+}
+
+function gaugeRowHtml(m) {
+  return `<li class="gauge-row s-${m.status}">
+      <div class="g-name"><h4>${m.label}</h4><p class="help">${m.help}</p></div>
+      <p class="g-value">${gaugeValue(m)}</p>
+      <div class="g-scale">${gaugeHtml(m)}
+        <p class="g-target"><span>${t('report.colTarget')} ${m.target}</span><span class="chip ${m.status}">${statusText(m.status)}</span></p>
+      </div>
+    </li>`;
+}
+
+function reportHeadHtml(res) {
   const rated = res.metrics.filter((m) => m.status !== 'na');
   const good = rated.filter((m) => m.status === 'good').length;
   const n = res.suggestions.length;
   const allGood = n === 0;
-  const dots = rated.map((m) => `<i class="${m.status}"></i>`).join('');
   const title = allGood ? t('verdict.allGood') : t('verdict.tweaks', { n });
   const sub = allGood ? t('verdict.allGoodSub') : t('verdict.startWith', { area: res.suggestions[0].area });
-  return `<div class="verdict${allGood ? ' all-good' : ''}">
-      <p class="verdict-title">${title}</p>
-      <p class="verdict-sub">${sub}</p>
-      ${rated.length ? `<p class="verdict-strip"><span class="dots" aria-hidden="true">${dots}</span>${t('verdict.inRange', { good, n: rated.length })}</p>` : ''}
-    </div>`;
+  const inRange = rated.length ? ` <span class="in-range">${t('verdict.inRange', { good, n: rated.length })}</span>` : '';
+  const meta = [
+    [t('report.metaStyle'), res.styleLabel],
+    [t('report.metaFrames'), res.sampleCount],
+    res.cadence ? [t('report.metaCadence'), `~${Math.round(res.cadence)} rpm`] : null,
+  ]
+    .filter(Boolean)
+    .map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`)
+    .join('');
+  return `<header class="report-head">
+      <h2>${t('report.title')}</h2>
+      <div class="verdict${allGood ? ' all-good' : ''}">
+        <p class="verdict-title">${title}</p>
+        <p class="verdict-sub">${sub}${inRange}</p>
+      </div>
+      <dl class="sheet-meta">${meta}</dl>
+    </header>`;
 }
 
 function renderReport({ scroll = true } = {}) {
@@ -667,37 +729,31 @@ function renderReport({ scroll = true } = {}) {
   const reveal = () => scroll && el.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
 
   if (!res.ok) {
-    el.innerHTML = `<div class="report-head"><h2>${t('report.title')}</h2></div>
-      <div class="card"><p><strong>${t('report.failed')}</strong> ${res.reason}</p>
-      <p class="mono">${t('report.usable', { n: res.sampleCount })}</p></div>`;
+    el.innerHTML = `<div class="report-sheet">
+      <header class="report-head"><h2>${t('report.title')}</h2>
+        <div class="verdict"><p class="verdict-sub"><strong>${t('report.failed')}</strong> ${res.reason}</p>
+        <p class="muted-note">${t('report.usable', { n: res.sampleCount })}</p></div>
+      </header></div>`;
     reveal();
     return;
   }
 
-  const rows = res.metrics
-    .map(
-      (m) => `<tr>
-        <td>${m.label}<span class="help">${m.help}</span></td>
-        <td class="num">${fmt(m)}</td>
-        <td class="mono" data-label="${t('report.colTarget')}">${m.target}</td>
-        <td><span class="chip ${m.status}">${statusText(m.status)}</span></td>
-      </tr>`,
-    )
-    .join('');
-
   const suggestions = res.suggestions.length
     ? res.suggestions
         .map(
-          (s) => `<article class="sugg p${s.priority}">
-            <div class="area"><span class="prio">${prioText(s.priority)}</span>· ${s.area}</div>
-            <h3>${s.title}</h3>
-            <p>${s.body}</p>
-            <p class="action">${s.action}</p>
-          </article>`,
+          (s, i) => `<li class="sugg p${s.priority}">
+            <span class="sugg-n" aria-hidden="true">${i + 1}</span>
+            <div>
+              <p class="sugg-meta"><span>${s.area}</span><span class="prio">${prioText(s.priority)}</span></p>
+              <h4>${s.title}</h4>
+              <p>${s.body}</p>
+              <p class="action"><b>${t('report.change')}</b>${s.action}</p>
+            </div>
+          </li>`,
         )
         .join('')
-    : `<article class="sugg"><div class="area">${t('report.allGoodArea')}</div><h3>${t('report.allGoodTitle')}</h3>
-        <p>${t('report.allGoodBody', { style: res.styleLabel })}</p></article>`;
+    : `<li class="sugg"><span class="sugg-n" aria-hidden="true"></span><div>
+        <h4>${t('report.allGoodTitle')}</h4><p>${t('report.allGoodBody', { style: res.styleLabel })}</p></div></li>`;
 
   const shots = state.lastShots ?? {};
   const snaps = [
@@ -707,42 +763,37 @@ function renderReport({ scroll = true } = {}) {
     .filter(Boolean)
     .join('');
 
-  el.innerHTML = `
-    <div class="report-head">
-      <h2>${t('report.title')}</h2>
-      <span class="meta">${t('report.meta', { style: res.styleLabel, n: res.sampleCount, rpm: res.cadence ? Math.round(res.cadence) : null })}</span>
-    </div>
-    ${verdictHtml(res)}
+  el.innerHTML = `<div class="report-sheet">
+    ${reportHeadHtml(res)}
     <div class="report-grid">
       <div class="col col-adjust">
-        <div class="card"><h2>${t('report.adjustments')}</h2>
-          <p class="muted-note">${t('report.adjIntro')}</p>
-        </div>
-        <div class="suggestions">${suggestions}</div>
-        <div class="card">
-          <h2>${t('report.fitData')}</h2>
+        <section>
+          <h3>${t('report.adjustments')}</h3>
+          <p class="section-intro">${t('report.adjIntro')}</p>
+          <ol class="suggestions">${suggestions}</ol>
+        </section>
+        <section>
+          <h3>${t('report.fitData')}</h3>
           ${fitDataHtml(res)}
-        </div>
+        </section>
       </div>
       <div class="col col-measure">
-        <div class="card">
-          <h2>${t('report.measurements')}</h2>
-          <table class="metrics-table">
-            <thead><tr><th>${t('report.colMeasure')}</th><th>${t('report.colYours')}</th><th>${t('report.colTarget')}</th><th></th></tr></thead>
-            <tbody>${rows}</tbody>
-          </table>
+        <section>
+          <h3>${t('report.measurements')}</h3>
+          <ol class="gauges">${res.metrics.map(gaugeRowHtml).join('')}</ol>
           ${snaps ? `<div class="snaps${shots.portrait ? ' portrait' : ''}">${snaps}</div>` : ''}
-        </div>
-        <div class="card">
-          <h2>${t('report.chart')}</h2>
+        </section>
+        <section>
+          <h3>${t('report.chart')}</h3>
           ${res.curve ? curveChart(res.curve) : `<p class="muted-note">${t('report.chartEmpty')}</p>`}
-        </div>
+        </section>
       </div>
     </div>
     <div class="report-actions">
       <button class="btn" id="btnPrint">${t('report.print')}</button>
       <span id="recordingSlot"></span>
-    </div>`;
+    </div>
+  </div>`;
   $('btnPrint').onclick = () => window.print();
   mountCharts(el);
   addRecordingLink();
@@ -774,9 +825,11 @@ function fitDataHtml(res) {
   const scale = src ? t('fd.accuracy', { label: t(src.label), acc: t(src.accuracy) }) : t('fd.uncalibrated');
   const bbText = t(res.bbSource === 'manual' ? 'fd.bbManual' : res.bbSource === 'auto' ? 'fd.bbAuto' : 'fd.bbNone');
   return `
-    <p class="fd-source">${t('fd.scale')}<strong>${scale}</strong>
-      · ${t('fd.bb')}${bbText}
-      · ${t('fd.kops')}${t(res.kopsMethod === 'crank' ? 'fd.kopsCrank' : 'fd.kopsEst')}</p>
+    <dl class="fd-source">
+      <dt>${noColon(t('fd.scale'))}</dt><dd>${scale}</dd>
+      <dt>${noColon(t('fd.bb'))}</dt><dd>${bbText}</dd>
+      <dt>${noColon(t('fd.kops'))}</dt><dd>${t(res.kopsMethod === 'crank' ? 'fd.kopsCrank' : 'fd.kopsEst')}</dd>
+    </dl>
     ${cells.length ? `<dl class="fitdata">${cells.join('')}</dl>` : `<p class="muted-note">${t('fd.empty')}</p>`}
     ${res.notes.length ? `<ul class="notes">${res.notes.map((n) => `<li>${n.text}</li>`).join('')}</ul>` : ''}`;
 }

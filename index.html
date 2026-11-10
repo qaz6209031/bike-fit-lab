@@ -4,6 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bike Fit Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -78,7 +81,8 @@
     </section>
 
     <aside class="panel">
-      <div class="card">
+      <div class="card setup">
+        <section class="group">
         <h2 data-i18n="settings.title">Settings</h2>
         <label class="field"><span data-i18n="settings.style">Riding style</span>
           <select id="style">
@@ -106,9 +110,9 @@
           </select>
         </label>
         <label class="check"><input type="checkbox" id="recordVideo" checked /> <span data-i18n="settings.record">Record annotated video</span></label>
-      </div>
+        </section>
 
-      <div class="card">
+        <section class="group">
         <h2 data-i18n="bike.title">Bike &amp; calibration</h2>
         <label class="field"><span><span data-i18n="bike.wheel">Front wheel size</span> <span class="hint" data-i18n="bike.wheelHint">Outer tire diameter, used to convert to real mm</span></span>
           <select id="wheel">
@@ -137,6 +141,7 @@
           </select>
         </label>
         <div class="calib-status" id="calibStatus" aria-live="polite"></div>
+        </section>
       </div>
 
       <div class="card">
@@ -144,7 +149,7 @@
         <dl id="live" class="live"></dl>
       </div>
 
-      <details class="card tips">
+      <details class="tips">
         <summary data-i18n="tips.title">How to film for accurate results</summary>
         <ol>
           <li data-i18n="tips.1"></li>

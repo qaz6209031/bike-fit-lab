@@ -260,6 +260,8 @@ export function analyzeSession(samples, { style = 'endurance', heightCm = null, 
     decimals,
     help: t(helpKey),
     target: formatRange(spec.range, unit),
+    range: spec.range,
+    tol: spec.tol,
     status: rate(value, spec.range, spec.tol),
     dir: dirOf(value, spec.range),
   });

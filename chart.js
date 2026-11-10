@@ -1,11 +1,11 @@
 // Knee & hip angle vs crank angle (one pedal revolution), as an inline SVG line chart.
 // Drawn at the container's real pixel width (and redrawn on resize) so text stays 12px at every size.
-// Colours validated for the dark surface with the dataviz palette validator.
+// Colours validated for the light sheet surface with the dataviz palette validator.
 import { t } from './i18n.js';
 
 const SERIES = [
-  { key: 'k', label: 'chart.knee', color: '#3b8fe8' },
-  { key: 'h', label: 'chart.hip', color: '#d06a1c' },
+  { key: 'k', label: 'chart.knee', color: '#1F5FBF' },
+  { key: 'h', label: 'chart.hip', color: '#C2561A' },
 ];
 const M = { l: 40, r: 12, t: 26, b: 30 };
 const NARROW = 520;
