@@ -421,7 +421,11 @@ p, li, .help { text-wrap: pretty; }
   .lang-switch button { padding: 7px 12px; }
 
   .layout { padding: 10px 16px 16px; gap: 16px; }
-  .placeholder .big { font-size: 27px; }
+  .placeholder .big { font-size: 24px; margin: 0; }
+  /* The intro above already explains the tool; the empty stage keeps only the drawing and the instruction. */
+  .stage:has(> .placeholder:not([hidden])) .placeholder { padding: 18px 16px 20px; }
+  .stage:has(> .placeholder:not([hidden])) .rider-demo { width: min(150px, 46%); margin-bottom: 10px; }
+  .placeholder p:not(.big) { display: none; }
   /* Leave room under portrait footage for the toolbar, so the primary action is on screen without scrolling. */
   .stage.portrait { width: min(100%, calc(62svh * var(--ar))); }
 
