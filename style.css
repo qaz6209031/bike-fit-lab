@@ -153,6 +153,16 @@ a.btn { display: inline-block; text-decoration: none; }
 .field { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: var(--ink); font-weight: 500; margin-bottom: 12px; }
 .field .hint { display: block; font-size: 13px; font-weight: 400; color: var(--muted); margin-top: 1px; }
 .field-error { font-size: 13.5px; color: var(--bad); }
+.height-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.height-inputs { display: flex; align-items: center; gap: 6px; flex: 1 1 140px; min-width: 0; }
+.height-inputs input { width: 100%; min-width: 0; }
+#heightImpBox input { width: 4.2em; flex: 0 1 auto; }
+.height-inputs .unit { font-size: 14px; color: var(--muted); font-weight: 500; }
+.unit-switch { display: inline-flex; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; flex: none; }
+.unit-switch button { appearance: none; border: 0; background: var(--sheet); color: var(--muted); font: inherit; font-size: 13.5px; font-weight: 600; padding: 8px 10px; cursor: pointer; }
+.unit-switch button + button { border-left: 1px solid var(--rule); }
+.unit-switch button:hover { color: var(--ink); }
+.unit-switch button[aria-pressed="true"] { background: var(--ink); color: #fff; }
 /* 16px keeps iOS Safari from zooming the page when a field gets focus. */
 select, input[type=number] {
   font: inherit; font-size: 16px; font-weight: 400; color: var(--ink); background: var(--sheet-2); border: 1px solid var(--rule);

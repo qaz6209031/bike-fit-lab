@@ -68,7 +68,7 @@ function numIn(id, lo, hi) {
 
 const settings = () => ({
   style: $('style').value,
-  heightCm: numIn('height', 120, 220),
+  heightCm: heightCm(),
   side: $('side').value,
   duration: parseInt($('duration').value, 10),
   record: $('recordVideo').checked,
@@ -76,6 +76,63 @@ const settings = () => ({
   wheelMm: $('wheel').value === 'custom' ? numIn('wheelCustom', 400, 800) : parseFloat($('wheel').value),
   crankMm: parseFloat($('crank').value),
 });
+
+// ---------- Height: centimeters or feet + inches ----------
+const IN_CM = 2.54;
+const HEIGHT_UNIT_KEY = 'bikefit.heightUnit';
+const storedUnit = () => {
+  try { return localStorage.getItem(HEIGHT_UNIT_KEY); } catch { return null; }
+};
+let heightUnit = storedUnit() ?? (/^en-(US|LR|MM)$/i.test(navigator.language) ? 'imp' : 'cm');
+
+/** Raw height in cm from whichever inputs are showing, or null when empty / incomplete. */
+function rawHeightCm() {
+  if (heightUnit === 'cm') {
+    const raw = $('height').value.trim();
+    return raw === '' ? null : parseFloat(raw);
+  }
+  const ft = $('heightFt').value.trim();
+  const inch = $('heightIn').value.trim();
+  if (ft === '' && inch === '') return null;
+  const total = (parseFloat(ft) || 0) * 12 + (parseFloat(inch) || 0);
+  return total * IN_CM;
+}
+
+/** Height in cm when inside 120–220 cm, else null (an invalid entry is ignored, never guessed at). */
+function heightCm() {
+  const v = rawHeightCm();
+  return v != null && v >= 120 && v <= 220 ? Math.round(v * 10) / 10 : null;
+}
+
+function validateHeight() {
+  const v = rawHeightCm();
+  const ok = v == null || heightCm() != null;
+  for (const id of ['height', 'heightFt', 'heightIn']) $(id).setAttribute('aria-invalid', String(!ok));
+  $('heightErr').hidden = ok;
+}
+
+/** Switch units, carrying the current value across so nothing has to be retyped. */
+function setHeightUnit(unit) {
+  const cm = rawHeightCm();
+  heightUnit = unit;
+  try { localStorage.setItem(HEIGHT_UNIT_KEY, unit); } catch {}
+  if (cm != null && Number.isFinite(cm)) {
+    if (unit === 'cm') $('height').value = Math.round(cm);
+    else {
+      const totalIn = Math.round((cm / IN_CM) * 2) / 2; // nearest half inch
+      $('heightFt').value = Math.floor(totalIn / 12);
+      $('heightIn').value = totalIn - Math.floor(totalIn / 12) * 12;
+    }
+  }
+  renderHeightUnit();
+  validateHeight();
+}
+
+function renderHeightUnit() {
+  $('heightCmBox').hidden = heightUnit !== 'cm';
+  $('heightImpBox').hidden = heightUnit === 'cm';
+  for (const b of $('heightUnit').querySelectorAll('button')) b.setAttribute('aria-pressed', String(b.dataset.unit === heightUnit));
+}
 
 /** Show or clear the inline error under a number field. Empty is valid (the field is optional). */
 function validateField(id, lo, hi) {
@@ -1038,7 +1095,16 @@ $('toastClose').onclick = () => toast(null);
 // Re-score the last session when the rider changes settings (without jumping the page to the report).
 const rescore = () => state.lastSamples && state.phase === 'idle' && !$('report').hidden && renderReport({ scroll: false });
 for (const id of ['style', 'crank']) $(id).addEventListener('change', () => (renderCalibStatus(), rescore()));
-for (const [id, lo, hi] of [['height', 120, 220], ['wheelCustom', 400, 800]]) {
+renderHeightUnit();
+$('heightUnit').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-unit]');
+  if (b && b.dataset.unit !== heightUnit) (setHeightUnit(b.dataset.unit), renderCalibStatus(), rescore());
+});
+for (const id of ['height', 'heightFt', 'heightIn']) {
+  $(id).addEventListener('change', () => (validateHeight(), renderCalibStatus(), rescore()));
+  $(id).addEventListener('input', () => $(id).getAttribute('aria-invalid') === 'true' && validateHeight());
+}
+for (const [id, lo, hi] of [['wheelCustom', 400, 800]]) {
   $(id).addEventListener('change', () => (validateField(id, lo, hi), renderCalibStatus(), rescore()));
   // Clear a stale error as soon as the entry becomes valid; only add errors on change, not mid-typing.
   $(id).addEventListener('input', () => $(id).getAttribute('aria-invalid') === 'true' && validateField(id, lo, hi));

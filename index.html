@@ -102,10 +102,26 @@
             <option value="race" data-i18n="style.race">Race / aggressive road</option>
           </select>
         </label>
-        <label class="field"><span><span data-i18n="settings.height">Your height (cm)</span> <span class="hint" data-i18n="settings.heightHint">Used to estimate adjustments in mm</span></span>
-          <input type="number" id="height" min="120" max="220" step="1" inputmode="numeric" data-i18n-ph="settings.heightPh" placeholder="e.g. 175" aria-describedby="heightErr" />
+        <div class="field" role="group" aria-labelledby="heightLabel">
+          <span><span id="heightLabel" data-i18n="settings.height">Your height</span> <span class="hint" data-i18n="settings.heightHint">Used to estimate adjustments in mm</span></span>
+          <div class="height-row">
+            <span class="unit-switch" id="heightUnit" role="group" data-i18n-aria="label.heightUnit" aria-label="Height unit">
+              <button type="button" data-unit="cm" aria-pressed="true">cm</button>
+              <button type="button" data-unit="imp" aria-pressed="false" data-i18n="settings.unitImp">ft / in</button>
+            </span>
+            <span class="height-inputs" id="heightCmBox">
+              <input type="number" id="height" min="120" max="220" step="1" inputmode="numeric" data-i18n-ph="settings.heightPh" placeholder="e.g. 175" data-i18n-aria="label.heightCm" aria-label="Height in centimeters" aria-describedby="heightErr" />
+              <span class="unit">cm</span>
+            </span>
+            <span class="height-inputs" id="heightImpBox" hidden>
+              <input type="number" id="heightFt" min="3" max="7" step="1" inputmode="numeric" placeholder="5" data-i18n-aria="label.feet" aria-label="Feet" aria-describedby="heightErr" />
+              <span class="unit" data-i18n="settings.ft">ft</span>
+              <input type="number" id="heightIn" min="0" max="11.5" step="0.5" inputmode="decimal" placeholder="9" data-i18n-aria="label.inches" aria-label="Inches" aria-describedby="heightErr" />
+              <span class="unit" data-i18n="settings.in">in</span>
+            </span>
+          </div>
           <span class="field-error" id="heightErr" data-i18n="settings.heightErr" hidden>Enter a height between 120 and 220 cm.</span>
-        </label>
+        </div>
         <label class="field"><span data-i18n="settings.side">Side facing the camera</span>
           <select id="side">
             <option value="auto" selected data-i18n="settings.sideAuto">Detect automatically</option>
