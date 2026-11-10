@@ -59,7 +59,11 @@ const state = {
   timers: [],
   sessionStart: 0,
   lastLiveUpdate: 0,
+  style: (() => {
+    try { return localStorage.getItem('bikefit.style'); } catch { return null; }
+  })() ?? 'endurance',
 };
+const STYLES_ORDER = ['comfort', 'endurance', 'race'];
 
 /** A number field's value when it is inside [lo, hi], else null (an invalid entry is ignored, never guessed at). */
 function numIn(id, lo, hi) {
@@ -69,10 +73,10 @@ function numIn(id, lo, hi) {
 }
 
 const settings = () => ({
-  style: $('style').value,
+  style: state.style,
   heightCm: heightCm(),
-  side: $('side').value,
-  record: $('recordVideo').checked,
+  side: 'auto', // detected from the pose; the side nearest the camera
+  record: true,
   speed: parseFloat($('speed').value),
   wheelMm: $('wheel').value === 'custom' ? numIn('wheelCustom', 400, 800) : parseFloat($('wheel').value),
   crankMm: parseFloat($('crank').value),
@@ -756,8 +760,12 @@ function reportHeadHtml(res) {
   const title = allGood ? t('verdict.allGood') : t('verdict.tweaks', { n });
   const sub = allGood ? t('verdict.allGoodSub') : t('verdict.startWith', { area: res.suggestions[0].area });
   const inRange = rated.length ? ` <span class="in-range">${t('verdict.inRange', { good, n: rated.length })}</span>` : '';
+  // Riding style only changes target ranges, so it is chosen here, after the measurements, and re-scores instantly.
+  const styleSwitch = `<span class="unit-switch style-switch" role="group" aria-label="${t('report.metaStyle')}">${STYLES_ORDER.map(
+    (k) => `<button type="button" data-style="${k}" aria-pressed="${k === state.style}" title="${t(`style.${k}`)}">${t(`styleShort.${k}`)}</button>`,
+  ).join('')}</span>`;
   const meta = [
-    [t('report.metaStyle'), res.styleLabel],
+    [t('report.metaStyle'), styleSwitch],
     [t('report.metaFrames'), res.sampleCount],
     res.cadence ? [t('report.metaCadence'), `~${Math.round(res.cadence)} rpm`] : null,
   ]
@@ -1095,7 +1103,15 @@ $('toastClose').onclick = () => toast(null);
 
 // Re-score the last session when the rider changes settings (without jumping the page to the report).
 const rescore = () => state.lastSamples && state.phase === 'idle' && !$('report').hidden && renderReport({ scroll: false });
-for (const id of ['style', 'crank']) $(id).addEventListener('change', () => (renderCalibStatus(), rescore()));
+$('crank').addEventListener('change', () => (renderCalibStatus(), rescore()));
+$('report').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-style]');
+  if (!b || b.dataset.style === state.style) return;
+  state.style = b.dataset.style;
+  try { localStorage.setItem('bikefit.style', state.style); } catch {}
+  rescore();
+  $('report').querySelector(`button[data-style="${state.style}"]`)?.focus();
+});
 renderHeightUnit();
 $('heightUnit').addEventListener('click', (e) => {
   const b = e.target.closest('button[data-unit]');

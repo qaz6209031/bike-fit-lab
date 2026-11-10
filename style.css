@@ -149,6 +149,10 @@ a.btn { display: inline-block; text-decoration: none; }
 .panel { display: flex; flex-direction: column; gap: 14px; }
 .card { background: var(--sheet); border-radius: 10px; padding: 18px; }
 .card h2 { font-size: 17px; font-weight: 700; margin-bottom: 12px; }
+.card-intro { margin: -4px 0 14px; font-size: 13.5px; color: var(--muted); }
+.card .calib-status + .group { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--rule); }
+.card .group .field:last-child { margin-bottom: 0; }
+.sheet-meta .style-switch button { padding: 5px 10px; font-size: 14px; font-stretch: 100%; font-weight: 600; }
 .card .group + .group { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--rule); }
 .field { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: var(--ink); font-weight: 500; margin-bottom: 12px; }
 .field .hint { display: block; font-size: 13px; font-weight: 400; color: var(--muted); margin-top: 1px; }

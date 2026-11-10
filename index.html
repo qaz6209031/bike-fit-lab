@@ -93,15 +93,36 @@
 
     <aside class="panel">
       <div class="card setup">
-        <section class="group">
-        <h2 data-i18n="settings.title">Settings</h2>
-        <label class="field"><span data-i18n="settings.style">Riding style</span>
-          <select id="style">
-            <option value="comfort" data-i18n="style.comfort">Comfort / commuter</option>
-            <option value="endurance" selected data-i18n="style.endurance">Endurance road / gravel</option>
-            <option value="race" data-i18n="style.race">Race / aggressive road</option>
+        <h2 data-i18n="accuracy.title">More accuracy (optional)</h2>
+        <p class="card-intro" data-i18n="accuracy.intro">Nothing here is required.</p>
+        <label class="field"><span><span data-i18n="bike.crank">Crank length</span> <span class="hint" data-i18n="bike.crankHint">Printed on the inside of the crank arm</span></span>
+          <select id="crank">
+            <option value="160">160 mm</option>
+            <option value="165">165 mm</option>
+            <option value="167.5">167.5 mm</option>
+            <option value="170">170 mm</option>
+            <option value="172.5" selected>172.5 mm</option>
+            <option value="175">175 mm</option>
           </select>
         </label>
+        <label class="field"><span><span data-i18n="bike.wheel">Front wheel size</span> <span class="hint" data-i18n="bike.wheelHint">Outer tire diameter, used to convert to real mm</span></span>
+          <select id="wheel">
+            <option value="672" data-i18n="bike.wheelOpt" data-i18n-args='{"name":"700×25c","mm":672}'>700×25c (≈ 672 mm)</option>
+            <option value="678" selected data-i18n="bike.wheelOpt" data-i18n-args='{"name":"700×28c","mm":678}'>700×28c (≈ 678 mm)</option>
+            <option value="686" data-i18n="bike.wheelOpt" data-i18n-args='{"name":"700×32c","mm":686}'>700×32c (≈ 686 mm)</option>
+            <option value="702" data-i18n="bike.wheelGravel" data-i18n-args='{"name":"700×40c","mm":702}'>700×40c gravel (≈ 702 mm)</option>
+            <option value="678" data-i18n="bike.wheelOpt" data-i18n-args='{"name":"650b×47","mm":678}'>650b×47 (≈ 678 mm)</option>
+            <option value="706" data-i18n="bike.wheelOpt" data-i18n-args='{"name":"27.5×2.4\"","mm":706}'>27.5×2.4" (≈ 706 mm)</option>
+            <option value="739" data-i18n="bike.wheelOpt" data-i18n-args='{"name":"29×2.3\"","mm":739}'>29×2.3" (≈ 739 mm)</option>
+            <option value="custom" data-i18n="bike.wheelCustom">Custom…</option>
+          </select>
+        </label>
+        <label class="field" id="wheelCustomField" hidden><span data-i18n="bike.customLabel">Custom outer tire diameter (mm)</span>
+          <input type="number" id="wheelCustom" min="400" max="800" step="1" inputmode="numeric" data-i18n-ph="bike.customPh" placeholder="e.g. 680" aria-describedby="wheelCustomErr" />
+          <span class="field-error" id="wheelCustomErr" data-i18n="bike.customErr" hidden>Enter a diameter between 400 and 800 mm.</span>
+        </label>
+        <div class="calib-status" id="calibStatus" aria-live="polite"></div>
+        <div class="group">
         <div class="field" role="group" aria-labelledby="heightLabel">
           <span><span id="heightLabel" data-i18n="settings.height">Your height</span> <span class="hint" data-i18n="settings.heightHint">Used to estimate adjustments in mm</span></span>
           <div class="height-row">
@@ -122,46 +143,7 @@
           </div>
           <span class="field-error" id="heightErr" data-i18n="settings.heightErr" hidden>Enter a height between 120 and 220 cm.</span>
         </div>
-        <label class="field"><span data-i18n="settings.side">Side facing the camera</span>
-          <select id="side">
-            <option value="auto" selected data-i18n="settings.sideAuto">Detect automatically</option>
-            <option value="left" data-i18n="side.left">Left</option>
-            <option value="right" data-i18n="side.right">Right</option>
-          </select>
-        </label>
-        <label class="check"><input type="checkbox" id="recordVideo" checked /> <span data-i18n="settings.record">Record annotated video</span></label>
-        </section>
-
-        <section class="group">
-        <h2 data-i18n="bike.title">Bike &amp; calibration</h2>
-        <label class="field"><span><span data-i18n="bike.wheel">Front wheel size</span> <span class="hint" data-i18n="bike.wheelHint">Outer tire diameter, used to convert to real mm</span></span>
-          <select id="wheel">
-            <option value="672" data-i18n="bike.wheelOpt" data-i18n-args='{"name":"700×25c","mm":672}'>700×25c (≈ 672 mm)</option>
-            <option value="678" selected data-i18n="bike.wheelOpt" data-i18n-args='{"name":"700×28c","mm":678}'>700×28c (≈ 678 mm)</option>
-            <option value="686" data-i18n="bike.wheelOpt" data-i18n-args='{"name":"700×32c","mm":686}'>700×32c (≈ 686 mm)</option>
-            <option value="702" data-i18n="bike.wheelGravel" data-i18n-args='{"name":"700×40c","mm":702}'>700×40c gravel (≈ 702 mm)</option>
-            <option value="678" data-i18n="bike.wheelOpt" data-i18n-args='{"name":"650b×47","mm":678}'>650b×47 (≈ 678 mm)</option>
-            <option value="706" data-i18n="bike.wheelOpt" data-i18n-args='{"name":"27.5×2.4\"","mm":706}'>27.5×2.4" (≈ 706 mm)</option>
-            <option value="739" data-i18n="bike.wheelOpt" data-i18n-args='{"name":"29×2.3\"","mm":739}'>29×2.3" (≈ 739 mm)</option>
-            <option value="custom" data-i18n="bike.wheelCustom">Custom…</option>
-          </select>
-        </label>
-        <label class="field" id="wheelCustomField" hidden><span data-i18n="bike.customLabel">Custom outer tire diameter (mm)</span>
-          <input type="number" id="wheelCustom" min="400" max="800" step="1" inputmode="numeric" data-i18n-ph="bike.customPh" placeholder="e.g. 680" aria-describedby="wheelCustomErr" />
-          <span class="field-error" id="wheelCustomErr" data-i18n="bike.customErr" hidden>Enter a diameter between 400 and 800 mm.</span>
-        </label>
-        <label class="field"><span data-i18n="bike.crank">Crank length</span>
-          <select id="crank">
-            <option value="160">160 mm</option>
-            <option value="165">165 mm</option>
-            <option value="167.5">167.5 mm</option>
-            <option value="170">170 mm</option>
-            <option value="172.5" selected>172.5 mm</option>
-            <option value="175">175 mm</option>
-          </select>
-        </label>
-        <div class="calib-status" id="calibStatus" aria-live="polite"></div>
-        </section>
+        </div>
       </div>
 
       <div class="card">
