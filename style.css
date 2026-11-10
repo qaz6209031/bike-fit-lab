@@ -154,7 +154,7 @@ select, input[type=number] {
 }
 select:hover, input[type=number]:hover { border-color: #8e969f; }
 input[aria-invalid="true"] { border-color: var(--bad); }
-::placeholder { color: #737c85; opacity: 1; }
+::placeholder { color: #656e78; opacity: 1; }
 .inline { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--muted); }
 .inline select { padding: 4px 8px; font-size: 14px; }
 .check { display: flex; align-items: center; gap: 8px; font-size: 14.5px; }

@@ -11,6 +11,14 @@
         ],
         "createdAt": "2026-11-07T02:24:54.648Z",
         "reason": "Claude: the blinking dot only shows while a fit session is actively capturing/recording, so it reflects a genuinely live state"
+      },
+      {
+        "rule": "pulsing-dot",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-11-10T00:27:31.818Z"
       }
     ]
   }
