@@ -37,7 +37,7 @@ h1, h2, h3, h4 { margin: 0; line-height: 1.2; }
 :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 
 /* Numerals and display type use Archivo's condensed width: the look of figures stamped on a tool. */
-.brand h1, .placeholder .big, .countdown, .live dd, .verdict-title, .sheet-meta dd,
+.brand-name, .placeholder .big, .countdown, .live dd, .verdict-title, .sheet-meta dd,
 .sugg-n, .fitdata dd, .g-value { font-stretch: 75%; font-variant-numeric: tabular-nums; }
 
 /* ---------- Top bar ---------- */
@@ -47,7 +47,7 @@ h1, h2, h3, h4 { margin: 0; line-height: 1.2; }
 }
 .brand { display: flex; align-items: center; gap: 10px; }
 .brand svg { width: 38px; height: 26px; fill: none; stroke: var(--ink); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
-.brand h1 { font-size: 27px; font-weight: 760; letter-spacing: -0.01em; }
+.brand-name { margin: 0; font-size: 27px; font-weight: 760; letter-spacing: -0.01em; }
 .topbar-end { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 
 /* Model status reads as an instrument light, not a badge. */
@@ -68,7 +68,7 @@ h1, h2, h3, h4 { margin: 0; line-height: 1.2; }
 
 /* ---------- Intro: one line of purpose above the workbench ---------- */
 .intro { max-width: 1500px; margin: 0 auto; padding: 14px 24px 2px; }
-.intro h2 { font-stretch: 75%; font-size: clamp(30px, 3.6vw, 44px); font-weight: 800; line-height: 1.02; letter-spacing: -0.01em; }
+.intro h1 { font-stretch: 75%; font-size: clamp(30px, 3.6vw, 44px); font-weight: 800; line-height: 1.02; letter-spacing: -0.01em; }
 .intro p { margin: 8px 0 0; max-width: 62em; font-size: 16px; color: #3a424b; }
 .intro a, .about a { color: var(--ink); font-weight: 600; text-decoration-thickness: 1.5px; text-underline-offset: 3px; white-space: nowrap; }
 
@@ -361,6 +361,7 @@ input[aria-invalid="true"] { border-color: var(--bad); }
 .chart-wrap .cross { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 3; }
 
 .foot { max-width: 1500px; margin: 0 auto; padding: 8px 24px 32px; color: var(--muted); font-size: 13.5px; }
+.foot p { margin: 0 0 4px; max-width: 90ch; }
 
 /* Balanced headings, no single-word last lines in running text. */
 h1, h2, h3, h4, .placeholder .big { text-wrap: balance; }
@@ -414,7 +415,7 @@ p, li, .help { text-wrap: pretty; }
   body:has(#placeholder[hidden]) .intro { display: none; }
   .brand { gap: 8px; min-width: 0; }
   .brand svg { width: 32px; height: 22px; flex: none; }
-  .brand h1 { font-size: 24px; white-space: nowrap; }
+  .brand-name { font-size: 24px; white-space: nowrap; }
   .topbar-end { flex-wrap: nowrap; gap: 8px; }
   /* "Ready" is implied by the enabled buttons; keep it for screen readers, free the row for the brand. Loading and errors stay visible. */
   .pill.ok { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }

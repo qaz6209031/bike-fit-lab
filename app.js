@@ -7,6 +7,9 @@ import { curveChart, mountCharts } from './chart.js';
 import { mountRiderDemo } from './rider-demo.js';
 import { t, getLang, setLang, onLangChange, applyStatic, LANGS, DICTS } from './i18n.js';
 
+// Usage events for Google Analytics (no-op when GA is blocked or not loaded). Never send video or body data.
+const track = (name, params = {}) => { try { window.gtag?.('event', name, params); } catch { /* analytics must never break the app */ } };
+
 // Loaded on demand so a CDN failure can be reported and retried instead of breaking the whole page.
 const VISION_URL = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs';
 const WASM_URL = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm';
@@ -251,6 +254,7 @@ async function startCamera() {
   if (!window.isSecureContext) return toast('err.cameraInsecure');
   if (!navigator.mediaDevices?.getUserMedia) return toast('err.cameraUnsupported');
   state.cameraStarting = true;
+  track('camera_start');
   updateButtons();
   stopSource();
   toast(null);
@@ -700,6 +704,7 @@ function renderLive(m, status, side, conf, crank) {
 function startSession() {
   if (state.phase !== 'idle' || !state.source || !state.landmarker) return;
   const cfg = settings();
+  track('fit_test_start', { source: state.source, style: cfg.style });
   $('report').hidden = true;
   if (state.toast?.type === 'info') toast(null);
   if (state.source === 'camera') {
@@ -784,6 +789,7 @@ function endSession(showReport) {
     state.reportSource = state.fileUrl ?? state.stream;
     state.lastShots = { bottom: state.best.img, front: state.front.img, portrait: canvas.height > canvas.width };
     state.lastQuality = summarizeQuality(state.qualSession, 1);
+    track('fit_report', { source: state.source, style: state.style });
     renderReport();
   }
 }
@@ -1215,6 +1221,7 @@ function retranslate() {
 
 $('btnCamera').onclick = () => (state.source === 'camera' ? stopSource() : startCamera());
 $('fileInput').onchange = (e) => {
+  if (e.target.files[0]) track('video_upload');
   loadFile(e.target.files[0]);
   e.target.value = '';
 };

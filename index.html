@@ -1,15 +1,52 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- Google tag (Google Analytics: visit counts only; no video or body data is ever sent) -->
+  <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-KHLQQ28Z"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+  </script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Free Bike Fit: a bike fit from your phone video</title>
+  <title>Free Bike Fit: free online bike fit from a phone video</title>
+  <meta name="description" content="Free online bike fit from a phone video. Film yourself pedaling from the side and get your knee, hip, back and arm angles, plus saddle height, setback and reach adjustments." />
   <link rel="canonical" href="https://freebikefit.com/" />
-  <meta property="og:title" content="Free Bike Fit" />
-  <meta property="og:description" content="A free starting point for adjusting your bike fit at home, from a video of you pedaling." />
-  <meta property="og:url" content="https://freebikefit.com/" />
+  <meta name="theme-color" content="#e9ebee" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="icon-192.png" type="image/png" sizes="192x192" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+
   <meta property="og:type" content="website" />
-  <meta name="description" content="A free starting point for adjusting your bike fit at home. Film yourself pedaling, measure your knee, hip, back and arm angles, and get saddle, reach and crank adjustments. Runs in your browser." />
+  <meta property="og:site_name" content="Free Bike Fit" />
+  <meta property="og:title" content="Free Bike Fit: free online bike fit from a phone video" />
+  <meta property="og:description" content="Film yourself pedaling from the side and get your joint angles and what to adjust first. Runs in your browser; your video never leaves your device." />
+  <meta property="og:url" content="https://freebikefit.com/" />
+  <meta property="og:image" content="https://freebikefit.com/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Free Bike Fit: knee angle 145 degrees on a tape gauge, inside the 140 to 150 degree target band" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:locale:alternate" content="zh_TW" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Free Bike Fit",
+    "url": "https://freebikefit.com/",
+    "description": "Free online bike fit from a phone video. Measures knee, hip, back and arm angles while you pedal and suggests saddle height, setback and reach adjustments.",
+    "applicationCategory": "SportsApplication",
+    "operatingSystem": "Any modern web browser",
+    "browserRequirements": "Requires JavaScript and a camera or a side-view video file",
+    "inLanguage": ["en", "zh-TW"],
+    "isAccessibleForFree": true,
+    "image": "https://freebikefit.com/og-image.png",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap" />
@@ -19,7 +56,7 @@
   <header class="topbar">
     <div class="brand">
       <svg viewBox="0 0 48 32" aria-hidden="true"><circle cx="10" cy="22" r="8"/><circle cx="38" cy="22" r="8"/><path d="M10 22 L19 8 L33 8 L38 22 M19 8 L24 22 L33 8 M24 22 L10 22 M17 5 h6 M31 4 l3 4"/></svg>
-      <h1>Free Bike Fit</h1>
+      <p class="brand-name">Free Bike Fit</p>
     </div>
     <div class="topbar-end">
       <span id="modelStatus" class="pill" role="status" data-i18n="status.loading">Loading pose model…</span>
@@ -28,8 +65,8 @@
   </header>
 
   <section class="intro" aria-labelledby="introTitle">
-    <h2 id="introTitle" data-i18n="intro.title">A bike fit from a phone video, free.</h2>
-    <p><span class="intro-lede" data-i18n="intro.lede"></span> <span class="intro-links"><a href="#how" data-i18n="intro.how">How it works</a><a href="#about" data-i18n="intro.more">Why it is free</a></span></p>
+    <h1 id="introTitle" data-i18n="intro.title">Dial in your bike fit at home, free.</h1>
+    <p><span class="intro-lede" data-i18n="intro.lede">Built to give you the most accurate fit a phone video can: it tracks your joint angles over 20 pedal strokes, checks them against ranges reviewed with recent bike fit research and tells you what to change first. Your video never leaves your device.</span> <span class="intro-links"><a href="#how" data-i18n="intro.how">How it works</a><a href="#about" data-i18n="intro.more">Why it is free</a></span></p>
   </section>
 
   <noscript><p class="toast">Free Bike Fit runs entirely in your browser and needs JavaScript turned on. ／ Free Bike Fit 完全在瀏覽器中執行，請開啟 JavaScript。</p></noscript>
@@ -72,7 +109,7 @@
         <p class="sc-title" data-i18n="check.title">Setup check</p>
         <ul id="setupCheckList" aria-live="polite"></ul>
       </div>
-      <p class="test-hint" id="testHint" data-i18n="hint.autoStop" hidden>The test stops by itself after 20 pedal strokes.</p>
+      <p class="test-hint" id="testHint" data-i18n="hint.autoStop" hidden>No need to stop it yourself: the test ends on its own after 20 complete pedal strokes (about 15–20 seconds at a steady cadence), then shows your report.</p>
 
       <div class="file-controls" id="fileControls" hidden>
         <button id="btnPlay" class="btn small" data-i18n="btn.play">Play</button>
@@ -91,7 +128,7 @@
     <aside class="panel">
       <div class="card setup">
         <h2 data-i18n="accuracy.title">More accuracy (optional)</h2>
-        <p class="card-intro" data-i18n="accuracy.intro">Nothing here is required.</p>
+        <p class="card-intro" data-i18n="accuracy.intro">Nothing here is required: angles are measured without it. Crank length and a quick wheel calibration turn them into real millimeters and correct camera tilt.</p>
         <label class="field"><span><span data-i18n="bike.crank">Crank length</span> <span class="hint" data-i18n="bike.crankHint">Printed on the inside of the crank arm</span></span>
           <select id="crank">
             <option value="160">160 mm</option>
@@ -121,7 +158,7 @@
         <div class="calib-status" id="calibStatus" aria-live="polite"></div>
         <div class="group">
         <div class="field" role="group" aria-labelledby="heightLabel">
-          <span><span id="heightLabel" data-i18n="settings.height">Your height</span> <span class="hint" data-i18n="settings.heightHint">Used to estimate adjustments in mm</span></span>
+          <span><span id="heightLabel" data-i18n="settings.height">Your height</span> <span class="hint" data-i18n="settings.heightHint">Only used when the pedal path cannot be measured</span></span>
           <div class="height-row">
             <span class="unit-switch" id="heightUnit" role="group" data-i18n-aria="label.heightUnit" aria-label="Height unit">
               <button type="button" data-unit="cm" aria-pressed="true">cm</button>
@@ -138,7 +175,7 @@
               <span class="unit" data-i18n="settings.in">in</span>
             </span>
           </div>
-          <span class="field-error" id="heightErr" data-i18n="settings.heightErr" hidden>Enter a height between 120 and 220 cm.</span>
+          <span class="field-error" id="heightErr" data-i18n="settings.heightErr" hidden>Enter a height between 120 and 220 cm (3 ft 11 in to 7 ft 2 in). It is ignored until then.</span>
         </div>
         </div>
       </div>
@@ -151,13 +188,13 @@
       <details class="tips">
         <summary data-i18n="tips.title">How to film for accurate results</summary>
         <ol>
-          <li data-i18n="tips.1"></li>
-          <li data-i18n="tips.2"></li>
-          <li data-i18n="tips.3"></li>
-          <li data-i18n="tips.4"></li>
-          <li data-i18n="tips.5"></li>
-          <li data-i18n="tips.6"></li>
-          <li data-i18n="tips.7"></li>
+          <li data-i18n="tips.1">Put the bike on an indoor trainer and level it.</li>
+          <li data-i18n="tips.2">Place the camera square to your side, at hip height, 2.5–4 m away, in landscape. Your whole body and both wheels must be in frame.</li>
+          <li data-i18n="tips.3">Wear close-fitting clothes. Use even light and a plain background.</li>
+          <li data-i18n="tips.4">Hold the hoods. After warming up, pedal steadily at about 80–90 rpm. The test stops by itself once it has 20 clean pedal strokes, usually 15–20 seconds.</li>
+          <li data-i18n="tips.5">The side nearest the camera is analyzed. If you know you are asymmetric, film each side.</li>
+          <li data-i18n="tips.6">Before starting, press “Calibrate scale” and click the front and rear edges of the front tire. This converts to real measurements and corrects camera tilt.</li>
+          <li data-i18n="tips.7">Using a computer? For the best accuracy, record on your phone and upload the video here. On iPhone, set Settings › Camera › Formats to Most Compatible so the video opens on any computer. A laptop webcam also works if it can sit at hip height, 2.5–4 m to your side.</li>
         </ol>
       </details>
     </aside>
@@ -169,16 +206,16 @@
     <div class="about-sheet how-sheet">
       <div class="how-lead">
         <h2 id="howTitle" data-i18n="how.title">How it works</h2>
-        <p data-i18n="how.intro"></p>
+        <p data-i18n="how.intro">A fitter watches you pedal, measures a few angles and compares them with what works for most riders. This site does the same steps with your phone camera.</p>
       </div>
       <ol class="how-steps">
-          <li><h3 data-i18n="how.s1t"></h3><p data-i18n="how.s1"></p></li>
-          <li><h3 data-i18n="how.s2t"></h3><p data-i18n="how.s2"></p></li>
-          <li><h3 data-i18n="how.s3t"></h3><p data-i18n="how.s3"></p></li>
-          <li><h3 data-i18n="how.s4t"></h3><p data-i18n="how.s4"></p></li>
-          <li><h3 data-i18n="how.s5t"></h3><p data-i18n="how.s5"></p></li>
+          <li><h3 data-i18n="how.s1t">Film from the side</h3><p data-i18n="how.s1">You pedal on a trainer while the camera sees your whole body side-on. A live camera or an uploaded video both work.</p></li>
+          <li><h3 data-i18n="how.s2t">Find your joints</h3><p data-i18n="how.s2">Google MediaPipe, a pose detection model running in your browser, marks your shoulder, elbow, wrist, hip, knee, ankle and foot in every frame. The video never leaves your device.</p></li>
+          <li><h3 data-i18n="how.s3t">Measure every pedal stroke</h3><p data-i18n="how.s3">From those points it measures your knee, hip, back, shoulder and elbow angles, and follows your foot around the pedal circle to find the crank and bottom bracket. It keeps going until it has 20 full strokes.</p></li>
+          <li><h3 data-i18n="how.s4t">Use your typical stroke, not one frame</h3><p data-i18n="how.s4">Your angles change a little every stroke, so it uses where your knee and hip usually end up at the top and bottom of the stroke. One sloppy stroke does not skew the result.</p></li>
+          <li><h3 data-i18n="how.s5t">Compare and suggest</h3><p data-i18n="how.s5">Each angle is checked against common bike fit ranges for your riding style, for example a knee angle of 140–150° at the bottom of the stroke. Anything outside a range becomes an adjustment, biggest first, with an estimated amount in millimeters.</p></li>
       </ol>
-      <p class="how-limit" data-i18n="how.limit"></p>
+      <p class="how-limit" data-i18n="how.limit">Because it uses one camera from the side, it measures what is visible from the side. It cannot see cleat rotation or how your knees move side to side.</p>
     </div>
   </section>
 
@@ -186,23 +223,26 @@
     <div class="about-sheet">
       <div class="about-story">
         <h2 id="aboutTitle" data-i18n="about.title">Why I built this</h2>
-        <p data-i18n="about.p1"></p>
-        <p data-i18n="about.p2"></p>
-        <p data-i18n="about.p3"></p>
+        <p data-i18n="about.p1">A professional bike fit cost me about $400–500, and I have had one at two different shops. Their advice did not match. One fitter said my torso was short, so I should not ride an aggressive position. The other said my body could go very aggressive.</p>
+        <p data-i18n="about.p2">I also went back to the same fitter for a second session. The first time, he told me to get an 80 mm stem, so I ordered one and installed it. The second time, he said my original stem suited me better. With internal cable routing, swapping a stem on my bike is not a quick job.</p>
+        <p data-i18n="about.p3">That is when I realized that even an expensive bike fit is partly opinion, and different fitters give different answers. What they measure is mostly a few joint angles compared with standard ranges, and a phone camera with an open-source pose model from Google can do that. So this site does it for free: no account, no upload, no app to install. Get the basics dialed in yourself and spend the money on bike gear instead.</p>
       </div>
       <div class="about-scope">
         <h3 data-i18n="about.goodTitle">What it can help you set</h3>
         <ul>
-          <li data-i18n="about.good1"></li>
-          <li data-i18n="about.good2"></li>
-          <li data-i18n="about.good3"></li>
-          <li data-i18n="about.good4"></li>
+          <li data-i18n="about.good1">Saddle height, from your knee angle at the bottom of the stroke</li>
+          <li data-i18n="about.good2">Saddle fore-aft, from where your knee sits over the pedal</li>
+          <li data-i18n="about.good3">Reach and bar height, from your back, shoulder and elbow angles</li>
+          <li data-i18n="about.good4">Whether your cranks may be too long</li>
         </ul>
       </div>
     </div>
   </section>
 
-  <footer class="foot" data-i18n="footer"></footer>
+  <footer class="foot">
+    <p data-i18n="footer">Values are estimates from 2D pose tracking: a starting point for adjustment, not a replacement for a professional fit. Change one thing at a time, in small steps, and stop if anything hurts.</p>
+    <p data-i18n="footer.analytics">This site uses Google Analytics to count visits. Your video is never sent anywhere.</p>
+  </footer>
 
   <script type="module" src="app.js"></script>
 </body>
