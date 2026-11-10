@@ -69,7 +69,7 @@ h1, h2, h3, h4 { margin: 0; line-height: 1.2; }
 /* ---------- Intro: one line of purpose above the workbench ---------- */
 .intro { max-width: 1500px; margin: 0 auto; padding: 14px 24px 2px; }
 .intro h1 { font-stretch: 75%; font-size: clamp(30px, 3.6vw, 44px); font-weight: 800; line-height: 1.02; letter-spacing: -0.01em; }
-.intro p { margin: 8px 0 0; max-width: 40em; font-size: 16px; color: #3a424b; }
+.intro p { margin: 8px 0 0; font-size: 16px; color: #3a424b; }
 .intro a, .about a { color: var(--ink); font-weight: 600; text-decoration-thickness: 1.5px; text-underline-offset: 3px; white-space: nowrap; }
 
 /* ---------- Workbench layout ---------- */
@@ -361,7 +361,7 @@ input[aria-invalid="true"] { border-color: var(--bad); }
 .chart-wrap .cross { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 3; }
 
 .foot { max-width: 1500px; margin: 0 auto; padding: 8px 24px 32px; color: var(--muted); font-size: 13.5px; }
-.foot p { margin: 0 0 4px; max-width: 34em; }
+.foot p { margin: 0 0 4px; }
 
 /* Balanced headings, no single-word last lines in running text. */
 h1, h2, h3, h4, .placeholder .big { text-wrap: balance; }

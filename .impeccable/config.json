@@ -28,6 +28,24 @@
         ],
         "createdAt": "2026-11-10T19:44:40.761Z",
         "reason": "Claude: static scan of the How it works steps; they have 12px top padding under the rule, and the rendered-page scan does not flag them"
+      },
+      {
+        "rule": "line-length",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-11-10T20:53:51.748Z",
+        "reason": "User asked for the intro and footer text to use the full desktop width"
+      },
+      {
+        "rule": "line-length",
+        "value": "*",
+        "files": [
+          "zh/index.html"
+        ],
+        "createdAt": "2026-11-10T20:53:51.774Z",
+        "reason": "User asked for the intro and footer text to use the full desktop width"
       }
     ]
   }
