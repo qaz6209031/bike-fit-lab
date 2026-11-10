@@ -80,7 +80,6 @@ const settings = () => ({
   heightCm: heightCm(),
   side: 'auto', // detected from the pose; the side nearest the camera
   record: true,
-  speed: parseFloat($('speed').value),
   wheelMm: $('wheel').value === 'custom' ? numIn('wheelCustom', 400, 800) : parseFloat($('wheel').value),
   crankMm: parseFloat($('crank').value),
 });
@@ -321,7 +320,7 @@ function loadFile(file) {
     const dur = Number.isFinite(video.duration) ? video.duration : 0;
     $('seek').max = dur || 1;
     if (dur > LONG_VIDEO_S) {
-      toast('info.longVideo', { min: (dur / 60).toFixed(1), est: Math.ceil(dur / settings().speed / 60) }, { type: 'info' });
+      toast('info.longVideo', { min: (dur / 60).toFixed(1) }, { type: 'info' });
     }
     onSourceReady();
   };
@@ -397,18 +396,59 @@ function updateButtons() {
 
 // ---------- Frame loop ----------
 
+// ---------- Analysis speed ----------
+// Uploaded videos are analyzed while they play. The speed is chosen automatically: as fast as the device can
+// keep up with while still analyzing ~30 frames per second of video (≈ 20 per pedal stroke at 90 rpm),
+// so a fast computer runs at 1× and a slower phone slows the video down instead of skipping frames.
+const FRAMES_PER_VIDEO_S = 30;
+const MIN_RATE = 0.25;
+const HAS_RVFC = 'requestVideoFrameCallback' in HTMLVideoElement.prototype;
+
+function autoRate() {
+  const cost = state.frameCostMs;
+  if (!cost) return 0.5; // nothing measured yet: a safe middle until the first second of data
+  const perSecond = 1000 / cost;
+  const rate = Math.min(1, Math.max(MIN_RATE, perSecond / FRAMES_PER_VIDEO_S));
+  return Math.round(rate * 20) / 20;
+}
+
+// Count each decoded frame exactly once (no repeats when a 120 Hz screen redraws the same frame).
+if (HAS_RVFC) {
+  const onFrame = () => {
+    state.frameSeq = (state.frameSeq ?? 0) + 1;
+    video.requestVideoFrameCallback(onFrame);
+  };
+  video.requestVideoFrameCallback(onFrame);
+}
+
 function loop() {
   requestAnimationFrame(loop);
   if (!state.source || video.readyState < 2) return;
   const time = video.currentTime;
   if (time === state.lastVideoTime) return;
+  // While a video plays, wait for a genuinely new frame; paused seeks and redraws go straight through.
+  if (HAS_RVFC && !video.paused && state.lastVideoTime >= 0) {
+    if (state.frameSeq === state.lastFrameSeq) return;
+  }
+  state.lastFrameSeq = state.frameSeq;
   if (state.source === 'file' && Math.abs(time - state.lastVideoTime) > 0.5) {
     state.smoother.reset();
     state.trail = [];
   }
   state.lastVideoTime = time;
+  const t0 = performance.now();
   processFrame();
-  if (state.source === 'file') syncFileControls();
+  const cost = performance.now() - t0;
+  // The first frames include model warm-up; cap the seed so one slow start does not drag the speed down.
+  state.frameCostMs = state.frameCostMs ? state.frameCostMs * 0.9 + cost * 0.1 : Math.min(cost, 40);
+  if (state.source === 'file') {
+    // Re-tune the analysis speed about once a second as the cost settles.
+    if (state.phase === 'collecting' && performance.now() - (state.lastRateTune ?? 0) > 1000) {
+      state.lastRateTune = performance.now();
+      video.playbackRate = autoRate();
+    }
+    syncFileControls();
+  }
 }
 
 function detect(ts) {
@@ -685,7 +725,7 @@ function startSession() {
   } else {
     video.pause();
     video.currentTime = 0;
-    video.playbackRate = cfg.speed;
+    video.playbackRate = autoRate();
     beginCollect(cfg);
     video.onended = () => endSession(true);
     video.play().catch((e) => {
@@ -1190,7 +1230,7 @@ $('btnUpload').addEventListener('keydown', (e) => {
 $('btnSession').onclick = () => (state.phase !== 'idle' ? endSession(false) : startSession());
 $('btnPlay').onclick = () => {
   if (video.paused) {
-    video.playbackRate = settings().speed;
+    video.playbackRate = 1;
     video.play().catch(() => toast('err.videoFormat'));
   } else video.pause();
   syncFileControls();
@@ -1198,9 +1238,6 @@ $('btnPlay').onclick = () => {
 video.addEventListener('pause', () => state.source === 'file' && syncFileControls());
 $('seek').oninput = (e) => {
   video.currentTime = parseFloat(e.target.value);
-};
-$('speed').onchange = () => {
-  video.playbackRate = settings().speed;
 };
 $('toastClose').onclick = () => toast(null);
 

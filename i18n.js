@@ -24,8 +24,8 @@ const en = {
   'err.notVideo': "That file isn't a video. Choose a side-view recording in MP4 or WebM.",
   'err.videoFormat': "This browser can't play that video. Convert it to MP4 (H.264) or WebM, then upload it again.",
   'err.snapshot': "Couldn't save the image. Wait until the video is showing, then try again.",
-  'info.longVideo': ({ min, est }) =>
-    `This video is ${min} min long, and analysis plays it at the speed you picked, so it will take about ${est} min. 20–40 seconds of steady pedaling is enough: press “Finish now” whenever you like.`,
+  'info.longVideo': ({ min }) =>
+    `This video is ${min} min long. That is fine: analysis stops on its own once it has 20 pedal strokes, so it only uses the first stretch of steady pedaling.`,
   'info.noRecorder': "This browser can't record the annotated video.",
 
   'placeholder.title': 'Film yourself pedaling from the side',
@@ -362,8 +362,8 @@ const zh = {
   'err.notVideo': '這個檔案不是影片，請選擇 MP4 或 WebM 格式的側面影片。',
   'err.videoFormat': '你的瀏覽器無法播放這部影片，請轉成 MP4（H.264）或 WebM 後重新上傳。',
   'err.snapshot': '無法儲存圖片，請等影片畫面出現後再試一次。',
-  'info.longVideo': ({ min, est }) =>
-    `影片長 ${min} 分鐘，分析會以所選速度播放，約需 ${est} 分鐘。其實 20–40 秒的穩定踩踏就足夠，可以隨時按「立即結束」。`,
+  'info.longVideo': ({ min }) =>
+    `影片長 ${min} 分鐘，沒關係：收集到 20 圈踩踏後分析會自動結束，只會用到前面一段穩定踩踏的部分。`,
   'info.noRecorder': '這個瀏覽器無法錄製標註影片。',
 
   'placeholder.title': '從側面拍攝你踩踏的樣子',
