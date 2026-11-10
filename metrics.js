@@ -160,3 +160,27 @@ export function fitCircle(points) {
 // (e.g. a small rider in portrait phone footage), so allow more scatter there.
 export const circleUsable = (c) =>
   !!c && c.coverage >= 0.75 && c.rms / c.r < (c.n >= 150 && c.coverage >= 0.9 ? 0.25 : 0.2);
+
+/**
+ * How usable one frame is for a side-view fit, from the raw landmarks (normalized 0–1 coordinates).
+ * - outside: near-side joints that sit at or beyond the frame edge (cut off).
+ * - sep: how far apart the left and right shoulders / hips appear, relative to torso length.
+ *   Side-on they overlap (≈ 0); the more the camera looks from the front or back, the larger it gets.
+ * - size: rider height (head to lowest foot point) as a fraction of the frame's short side.
+ * - vis: mean landmark visibility of the near side (low in dim light, baggy clothes, busy backgrounds).
+ */
+export function captureQuality(lms, side, width, height) {
+  const idx = IDX[side];
+  const m = 0.01;
+  const outside = JOINTS.filter((j) => {
+    const p = lms[idx[j]];
+    return p.x < m || p.x > 1 - m || p.y < m || p.y > 1 - m;
+  });
+  const px = (i) => ({ x: lms[i].x * width, y: lms[i].y * height });
+  const torso = dist(px(idx.shoulder), px(idx.hip)) || 1;
+  const sep = Math.max(Math.abs(lms[11].x - lms[12].x), Math.abs(lms[23].x - lms[24].x)) * width / torso;
+  const ys = [0, idx.shoulder, idx.hip, idx.knee, idx.ankle, idx.heel, idx.toe].map((i) => lms[i].y * height);
+  const size = (Math.max(...ys) - Math.min(...ys)) / Math.min(width, height);
+  const vis = JOINTS.reduce((a, j) => a + (lms[idx[j]].visibility ?? 1), 0) / JOINTS.length;
+  return { outside, sep, size, vis };
+}

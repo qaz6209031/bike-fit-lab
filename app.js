@@ -1,5 +1,5 @@
 import {
-  sideScore, extractPoints, computeMetrics, PointSmoother, levelPoints, rotatePt, crankAngle, fitCircle, circleUsable,
+  sideScore, extractPoints, computeMetrics, captureQuality, PointSmoother, levelPoints, rotatePt, crankAngle, fitCircle, circleUsable,
 } from './metrics.js';
 import { analyzeSession, liveRanges, rate, SCALE_SOURCES } from './analysis.js';
 import { drawOverlay, drawMessage, drawCalibration } from './draw.js';
@@ -344,6 +344,8 @@ function onSourceReady() {
   state.ballBuf = [];
   state.liveCircle = null;
   state.footForwardPeak = 0;
+  state.qualWin = [];
+  renderSetupCheck();
   renderCalibStatus();
   updateButtons();
   if (state.source === 'file') syncFileControls();
@@ -369,6 +371,8 @@ function stopSource() {
   canvas.height = 150;
   riderDemo.start();
   $('fileControls').hidden = true;
+  state.qualWin = [];
+  renderSetupCheck();
   renderLiveEmpty();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   updateButtons();
@@ -457,6 +461,7 @@ function processFrame() {
   const res = detect(ts);
   const lms = res?.landmarks?.[0];
   if (!lms) {
+    pushQuality(null);
     calDraw();
     if (state.calibStep < 0) drawMessage(ctx, t('canvas.noRider'));
     return;
@@ -473,6 +478,7 @@ function processFrame() {
     state.trail = [];
   }
 
+  pushQuality(captureQuality(lms, side, W, H));
   const raw = extractPoints(lms, side, W, H);
   const pts = state.smoother.apply(raw);
   const m = computeMetrics(levelPoints(raw, cal.roll));
@@ -571,6 +577,67 @@ function countStroke(knee) {
   }
 }
 
+// ---------- Capture quality ----------
+// A rolling window drives the live setup check; a session tally feeds the report.
+// Thresholds were set against a real side-view phone clip (separation ≈ 0.13, size ≈ 0.37, visibility ≈ 0.98).
+const QUALITY_WINDOW = 60;
+const Q = { detect: 0.5, outFrac: 0.15, sep: 0.35, size: 0.3, vis: 0.7 };
+const CHECKS = ['frame', 'angle', 'size', 'tracking'];
+const medianOf = (a) => {
+  const s = [...a].sort((x, y) => x - y);
+  return s.length ? s[Math.floor((s.length - 1) / 2)] : NaN;
+};
+
+function pushQuality(q) {
+  const w = (state.qualWin ??= []);
+  w.push(q);
+  if (w.length > QUALITY_WINDOW) w.shift();
+  if (state.phase === 'collecting') (state.qualSession ??= []).push(q);
+  if (performance.now() - (state.lastQualRender ?? 0) > 500) {
+    state.lastQualRender = performance.now();
+    renderSetupCheck();
+  }
+}
+
+/** Which checks fail over a run of frames: { noRider, failed: Set, feet } or null when there is too little to judge. */
+function summarizeQuality(list, minFrames = 20) {
+  if (!list || list.length < minFrames) return null;
+  const seen = list.filter(Boolean);
+  if (seen.length / list.length < Q.detect) return { noRider: true, failed: new Set() };
+  const cut = seen.filter((q) => q.outside.length);
+  const failed = new Set();
+  if (cut.length / seen.length > Q.outFrac) failed.add('frame');
+  if (medianOf(seen.map((q) => q.sep)) > Q.sep) failed.add('angle');
+  if (medianOf(seen.map((q) => q.size)) < Q.size) failed.add('size');
+  if (medianOf(seen.map((q) => q.vis)) < Q.vis) failed.add('tracking');
+  const feet = cut.some((q) => q.outside.some((j) => j === 'ankle' || j === 'heel' || j === 'toe'));
+  return { noRider: false, failed, feet };
+}
+
+/** Live checklist under the stage: what is fine, and the one thing to move when something is not. */
+function renderSetupCheck() {
+  const box = $('setupCheck');
+  box.hidden = !state.source || !state.landmarker;
+  if (box.hidden) return;
+  const s = summarizeQuality(state.qualWin);
+  // A paused upload produces no frames to judge; the check appears once it plays or is analyzed.
+  if (!s && state.source === 'file') {
+    box.hidden = true;
+    return;
+  }
+  let html;
+  if (!s) html = `<li class="sc-wait">${t('check.checking')}</li>`;
+  else if (s.noRider) html = `<li class="sc-bad">${t('check.noRider')}</li>`;
+  else
+    html = CHECKS.map((c) => {
+      const bad = s.failed.has(c);
+      const fix = bad ? `<span class="sc-fix">${t(c === 'frame' && s.feet ? 'check.fix.feet' : `check.fix.${c}`)}</span>` : '';
+      return `<li class="${bad ? 'sc-bad' : 'sc-ok'}"><span class="sc-label">${t(`check.${c}`)}</span>${fix}</li>`;
+    }).join('');
+  // Only touch the DOM when something changed, so screen readers are not flooded.
+  if ($('setupCheckList').innerHTML !== html) $('setupCheckList').innerHTML = html;
+}
+
 function renderLive(m, status, side, conf, crank) {
   state.liveHasData = true;
   const row = (label, value, cls = '') => `<dt>${label}</dt><dd class="${cls}">${value}</dd>`;
@@ -636,6 +703,7 @@ function beginCollect(cfg) {
   state.front = { err: Infinity, ff: -Infinity, img: null };
   state.sessionKneeMax = 0;
   state.strokes = { n: 0, knees: [], low: false };
+  state.qualSession = [];
   state.sessionStart = performance.now();
   state.recordUnsupported = false;
   // A new run never shows the previous run's video.
@@ -675,6 +743,7 @@ function endSession(showReport) {
     state.reportCalib = state.calib;
     state.reportSource = state.fileUrl ?? state.stream;
     state.lastShots = { bottom: state.best.img, front: state.front.img, portrait: canvas.height > canvas.width };
+    state.lastQuality = summarizeQuality(state.qualSession, 1);
     renderReport();
   }
 }
@@ -786,6 +855,16 @@ function gaugeRowHtml(m) {
     </li>`;
 }
 
+/** Capture problems seen during the test, said up front because they limit how far the numbers can be trusted. */
+function captureWarningHtml() {
+  const failed = [...(state.lastQuality?.failed ?? [])];
+  if (!failed.length) return '';
+  return `<div class="capture-warn" role="note">
+      <h3>${t('q.title')}</h3>
+      <ul>${failed.map((c) => `<li>${t(`q.${c}`)}</li>`).join('')}</ul>
+    </div>`;
+}
+
 function reportHeadHtml(res) {
   const rated = res.metrics.filter((m) => m.status !== 'na');
   const good = rated.filter((m) => m.status === 'good').length;
@@ -865,6 +944,7 @@ function renderReport({ scroll = true } = {}) {
 
   el.innerHTML = `<div class="report-sheet">
     ${reportHeadHtml(res)}
+    ${captureWarningHtml()}
     <div class="report-grid">
       <div class="col col-adjust">
         <section>
@@ -1085,6 +1165,7 @@ function retranslate() {
   renderCalibStatus();
   if (state.calibStep >= 0) renderCalibBar();
   if (state.source === 'file') syncFileControls();
+  renderSetupCheck();
   if (!$('report').hidden && state.lastSamples) renderReport({ scroll: false });
   if (!state.liveHasData) renderLiveEmpty();
   redraw();
@@ -1175,7 +1256,7 @@ onLangChange(retranslate);
 
 // Dev-only hook for testing the report without a real video: open with ?debug
 if (new URLSearchParams(location.search).has('debug')) {
-  window.__bikefit = { state, renderReport, renderCalibStatus, onSourceReady, toast, setLang, stopSource };
+  window.__bikefit = { renderSetupCheck, summarizeQuality, state, renderReport, renderCalibStatus, onSourceReady, toast, setLang, stopSource };
 }
 
 retranslate();

@@ -104,6 +104,22 @@ h1, h2, h3, h4 { margin: 0; line-height: 1.2; }
 }
 .rec-bar { width: 64px; height: 5px; border-radius: 3px; background: rgba(255, 255, 255, 0.25); overflow: hidden; }
 .rec-bar i { display: block; height: 100%; width: 0; background: var(--tape); transition: width 0.25s ease-out; }
+/* Setup check: a short list under the stage; a failing item carries the one fix to make. */
+.setup-check { margin-top: 12px; padding: 10px 14px; background: var(--sheet); border-radius: 8px; }
+.sc-title { margin: 0 0 4px; font-size: 13.5px; font-weight: 700; }
+.setup-check ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 14px; }
+.setup-check li { display: grid; grid-template-columns: 8px minmax(0, 1fr); column-gap: 8px; align-items: baseline; }
+.setup-check li::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #aab1b8; transform: translateY(-1px); }
+.setup-check li > * { grid-column: 2; }
+.setup-check .sc-ok::before { background: var(--good); }
+.setup-check .sc-bad::before { background: var(--close); }
+.setup-check .sc-bad { flex-basis: 100%; }
+.setup-check .sc-bad .sc-label { font-weight: 600; }
+.setup-check .sc-fix { color: #7c3a06; }
+.setup-check .sc-wait { color: var(--muted); }
+.capture-warn { margin: 20px 0 0; padding: 12px 16px; border-radius: 8px; background: #fdf1e2; color: #5e2c05; }
+.capture-warn h3 { font-size: 15px; font-weight: 700; margin: 0 0 4px; }
+.capture-warn ul { margin: 0; padding-left: 18px; font-size: 14.5px; }
 .test-hint { margin: 10px 0 0; font-size: 14px; color: var(--muted); max-width: 70ch; }
 .rec-dot { width: 9px; height: 9px; border-radius: 50%; background: #ef4444; animation: blink 1s infinite; }
 @keyframes blink { 50% { opacity: 0.25; } }
