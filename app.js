@@ -15,6 +15,8 @@ const MODEL_URL =
 const SLOW_MODEL_MS = 15000;
 const LONG_VIDEO_S = 90;
 const MAX_CANVAS_PX = 1280;
+// About 27 pedal strokes at 80 rpm: enough for stable stroke extremes. "Finish now" ends a test early.
+const CAMERA_TEST_S = 20;
 
 const $ = (id) => document.getElementById(id);
 const video = $('video');
@@ -70,7 +72,6 @@ const settings = () => ({
   style: $('style').value,
   heightCm: heightCm(),
   side: $('side').value,
-  duration: parseInt($('duration').value, 10),
   record: $('recordVideo').checked,
   speed: parseFloat($('speed').value),
   wheelMm: $('wheel').value === 'custom' ? numIn('wheelCustom', 400, 800) : parseFloat($('wheel').value),
@@ -575,7 +576,7 @@ function startSession() {
       cd.innerHTML = `<span class="cd-n">${t('countdown.go')}</span>`;
       state.timers.push(setTimeout(() => (cd.hidden = true), 700));
       beginCollect(cfg);
-      state.timers.push(setTimeout(() => endSession(true), cfg.duration * 1000));
+      state.timers.push(setTimeout(() => endSession(true), CAMERA_TEST_S * 1000));
     }, 1000);
     state.timers.push(iv);
   } else {
@@ -609,7 +610,7 @@ function beginCollect(cfg) {
     const s = (performance.now() - state.sessionStart) / 1000;
     $('recText').textContent =
       state.source === 'camera'
-        ? t('rec.remaining', { s: Math.max(0, cfg.duration - s).toFixed(0) })
+        ? t('rec.remaining', { s: Math.max(0, CAMERA_TEST_S - s).toFixed(0) })
         : t('rec.elapsed', { s: s.toFixed(0) });
   };
   tick();
