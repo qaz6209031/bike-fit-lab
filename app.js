@@ -317,6 +317,9 @@ function updateButtons() {
   $('btnStop').disabled = !state.source;
   $('btnStop').textContent = t(busy ? 'btn.finishNow' : 'btn.stop');
   $('btnCamera').disabled = busy || state.cameraStarting;
+  // Upload is a <label>: disabling its input blocks the picker; aria-disabled carries the state to the label.
+  $('fileInput').disabled = busy;
+  $('btnUpload').setAttribute('aria-disabled', String(busy));
   $('btnCalib').disabled = !state.source || busy || state.calibStep >= 0;
 }
 
@@ -540,6 +543,9 @@ function beginCollect(cfg) {
   state.sessionKneeMax = 0;
   state.sessionStart = performance.now();
   state.recordUnsupported = false;
+  // A new run never shows the previous run's video.
+  if (state.recordingUrl) URL.revokeObjectURL(state.recordingUrl);
+  state.recordingUrl = null;
   if (cfg.record) startRecorder();
   $('recBadge').hidden = false;
   const tick = () => {
@@ -570,6 +576,8 @@ function endSession(showReport) {
   updateButtons();
   if (wasCollecting && showReport) {
     state.lastSamples = state.samples;
+    state.reportCalib = state.calib;
+    state.reportSource = state.fileUrl ?? state.stream;
     state.lastShots = { bottom: state.best.img, front: state.front.img, portrait: canvas.height > canvas.width };
     renderReport();
   }
@@ -652,7 +660,7 @@ function renderReport({ scroll = true } = {}) {
     style: cfg.style,
     heightCm: cfg.heightCm,
     crankMm: cfg.crankMm,
-    calib: calibInfo(cfg),
+    calib: calibInfo(cfg, state.reportCalib ?? {}),
   });
   const el = $('report');
   el.hidden = false;
@@ -777,8 +785,7 @@ function fitDataHtml(res) {
 
 const CALIB_STEPS = ['wheelA', 'wheelB', 'bb', 'saddle', 'bar'];
 
-function calibInfo(cfg = settings()) {
-  const c = state.calib;
+function calibInfo(cfg = settings(), c = state.calib) {
   const out = { bb: c.bb ?? null, saddle: c.saddle ?? null, bar: c.bar ?? null, pxPerMm: null, roll: 0, rollRejected: null, tooClose: false };
   if (c.wheelA && c.wheelB) {
     const d = Math.hypot(c.wheelB.x - c.wheelA.x, c.wheelB.y - c.wheelA.y);
@@ -856,6 +863,8 @@ function closeCalib() {
 function finishCalib() {
   if (state.calib.wheelA && !state.calib.wheelB) delete state.calib.wheelA;
   closeCalib();
+  // Calibrating the same footage after a run re-scores that run; another video's clicks never touch it.
+  if (state.reportSource && state.reportSource === (state.fileUrl ?? state.stream)) state.reportCalib = state.calib;
   state.liveCircle = null;
   renderCalibStatus();
   updateButtons();
@@ -941,7 +950,7 @@ $('btnUpload').setAttribute('role', 'button');
 $('btnUpload').addEventListener('keydown', (e) => {
   if (e.key === 'Enter' || e.key === ' ') {
     e.preventDefault();
-    $('fileInput').click();
+    if (!$('fileInput').disabled) $('fileInput').click();
   }
 });
 $('btnSession').onclick = startSession;
@@ -974,7 +983,7 @@ $('speed').onchange = () => {
 $('toastClose').onclick = () => toast(null);
 
 // Re-score the last session when the rider changes settings (without jumping the page to the report).
-const rescore = () => state.lastSamples && state.phase === 'idle' && renderReport({ scroll: false });
+const rescore = () => state.lastSamples && state.phase === 'idle' && !$('report').hidden && renderReport({ scroll: false });
 for (const id of ['style', 'crank']) $(id).addEventListener('change', () => (renderCalibStatus(), rescore()));
 for (const [id, lo, hi] of [['height', 120, 220], ['wheelCustom', 400, 800]]) {
   $(id).addEventListener('change', () => (validateField(id, lo, hi), renderCalibStatus(), rescore()));
