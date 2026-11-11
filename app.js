@@ -988,7 +988,10 @@ function renderReport({ scroll = true } = {}) {
     .filter(Boolean)
     .join('');
 
+  // Shown only on paper: where the sheet came from and when.
+  const printedOn = new Date().toLocaleDateString(getLang(), { year: 'numeric', month: 'long', day: 'numeric' });
   el.innerHTML = `<div class="report-sheet">
+    <p class="print-head"><b>Free Bike Fit</b><span>freebikefit.com</span><span>${printedOn}</span></p>
     ${reportHeadHtml(res)}
     ${captureWarningHtml()}
     <div class="report-grid">
@@ -1019,6 +1022,7 @@ function renderReport({ scroll = true } = {}) {
       <button class="btn" id="btnPrint">${t('report.print')}</button>
       <span id="recordingSlot"></span>
     </div>
+    <p class="print-foot">${t('footer')}</p>
   </div>`;
   $('btnPrint').onclick = () => window.print();
   mountCharts(el);

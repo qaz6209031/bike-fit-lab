@@ -20,10 +20,10 @@ colors:
 typography:
   display:
     fontFamily: "Archivo, ui-sans-serif, system-ui, \"PingFang TC\", \"Noto Sans TC\", sans-serif"
-    fontStretch: "75%"
-    fontSize: "clamp(40px, 5vw, 58px)"
-    fontWeight: 800
-    lineHeight: 0.98
+    fontStretch: "66%"
+    fontSize: "clamp(40px, 5.6vw, 80px)"
+    fontWeight: 850
+    lineHeight: 0.94
   figure:
     fontFamily: "Archivo, ui-sans-serif, system-ui, sans-serif"
     fontStretch: "75%"
@@ -47,9 +47,9 @@ typography:
     lineHeight: 1.4
 rounded:
   well: "4px"
-  control: "6px"
-  sheet: "10px"
-  chip: "999px"
+  control: "4px"
+  sheet: "4px"
+  chip: "3px"
 spacing:
   xs: "4px"
   sm: "8px"
@@ -61,13 +61,13 @@ components:
   button:
     backgroundColor: "{colors.sheet}"
     textColor: "{colors.graphite}"
-    borderColor: "{colors.rule}"
+    borderColor: "{colors.graphite}"
     rounded: "{rounded.control}"
     padding: "9px 16px"
   button-primary:
     backgroundColor: "{colors.tape-yellow}"
     textColor: "{colors.graphite}"
-    borderColor: "{colors.tape-yellow-edge}"
+    borderColor: "{colors.graphite}"
     rounded: "{rounded.control}"
   button-disabled:
     backgroundColor: "rgba(28,33,38,0.05)"
@@ -93,17 +93,17 @@ components:
 
 ## Overview
 
-**North Star: "The Fitter's Tape."** A home cyclist props a phone beside the trainer and wants what a bike fitter gives them: angles measured against a target, and the one wrench turn to make first. The interface borrows the fitter's tools rather than the look of a software dashboard: a brushed-alloy workbench, white fit sheets, graphite ink, and tape-measure yellow wherever something is being measured. The video lives in a true-black well so the overlay reads at a distance.
+**North Star: "Tape on the bench."** A home cyclist props a phone beside the trainer and wants what a bike fitter gives them: angles measured against a target, and the one wrench turn to make first. The page is a workbench: brushed alloy ruled in graphite, a true-black video well, one white fit sheet, one graphite block. The tape measure is the structure, not a decoration.
 
-The memorable element is the **tape gauge**: every measurement in the report is laid on a strip of tape with ticks, its target band in yellow and the rider's value as a needle in its status colour. Everything around it stays quiet.
+The signature is the **tape**: a ruled line carrying the five "How it works" stations, and a tape gauge for every measurement in the report. (A live knee-angle tape under the headline was tried and removed at the owner's request.) Everything around it stays quiet.
 
-This replaced an earlier dark navy + mint direction (November 2026) that read as a generic AI-generated tool: near-black with one acid accent, identical rounded cards, ALL-CAPS card labels, middle-dot meta strings and monospace data labels.
+History: a dark navy + mint direction was replaced in November 2026 by "The Fitter's Tape" (white rounded sheets on alloy). The second pass (also November 2026) removed the remaining card-on-grey look: side-column cards became ruled spec sections, "How it works" became five stations on a ruled line, the story became a graphite block, and display type grew and narrowed.
 
 ## Colors
 
 - **Alloy** (#e9ebee) is the page; cool, never cream.
-- **Sheet** (#ffffff) carries setup and the report. Sheets sit on alloy with no shadow; the value step is the edge.
-- **Graphite** (#1c2126) is all primary text and the selected state of toggles. **Spoke** (#5b6570) is secondary text (5:1 on alloy).
+- **Sheet** (#ffffff) is the fit report and the inputs. Setup, live angles and "How it works" sit straight on alloy under 2px graphite rules; they are not sheets.
+- **Graphite** (#1c2126) is all primary text, control outlines, section rules, the selected state of toggles, and the background of the single "Why I built this" block. **Spoke** (#5b6570) is secondary text (5:1 on alloy).
 - **Tape yellow** (#ffc21a) is a fill, never a text colour. It marks measurement: the primary action, gauge target bands, the chart's target band, the "Change" tag on each adjustment, the demo rider's angle tag.
 - **Status**: good #17803d, borderline #b45309, adjust #c2261d. Always paired with words (chip text, value colour plus label).
 - **Calibration pink** (#db2777) belongs only to calibration: the calibration bar outline and the canvas click markers.
@@ -117,11 +117,11 @@ This replaced an earlier dark navy + mint direction (November 2026) that read as
 
 One family, two widths. **Archivo** (Google Fonts, variable `wdth` 62–125, `wght` 100–900) at normal width for reading, and at 75% width for figures and display: the verdict, the gauge values, live angles, fit-data numbers, step numbers, the wordmark. Condensed figures look stamped on a tool and keep large numbers compact. Chinese text falls back to PingFang TC / Noto Sans TC.
 
-- Display (verdict): 40–58px, 800, condensed, line-height 0.98.
+- Display (page headline, verdict, section headings): 36–84px, 850, width 66%, line-height 0.94. Chinese display text is set smaller with normal line-height.
 - Figures: 23–36px, 700–800, condensed, tabular.
-- Section headings: 17–19px, 700, sentence case.
+- Side-column and report headings: 23–26px, 800, condensed, sentence case. Step numerals: 48–64px.
 - Body: 15.5px / 1.55. Small and help text: 13–13.5px in Spoke.
-- Running text is capped near 66ch.
+- Running text is capped near 62ch, except the intro lede and footer, which use the full width at the owner's request.
 
 ### Named Rules
 - **No All-Caps Labels.** Headings are sentence case at real heading weight; no tracked-out eyebrow labels.
@@ -129,9 +129,14 @@ One family, two widths. **Archivo** (Google Fonts, variable `wdth` 62–125, `wg
 
 ## Layout
 
-Workbench: the stage column (video well, toolbar, file controls) on the left; a 330px side column with the setup sheet (two groups, "Rider & test" and "Bike & calibration", divided by a hairline), the live readout and the filming tips. Under 960px everything stacks; under 560px the toolbar becomes a 2×3 grid of 44px buttons with the primary action bottom-right.
+Top bar on a full-width graphite rule, then the headline and the lede. Workbench below: the stage column (video well, toolbar, file controls) on the left; a 330px side column of ruled sections (setup, live readout, filming tips). On desktop the empty well is a wide band (drawing left, instruction right) so the buttons stay on screen. Under 960px everything stacks; under 560px the toolbar becomes a 2×2 grid of 44px buttons with the primary action bottom-right.
 
-The report is a single **fit sheet**: header (verdict, in-range count, and a small definition list of riding style / frames / cadence), then two columns: adjustments and fit data on the left, gauges, snapshots and the crank chart on the right. Left-aligned throughout.
+The report is a single **fit sheet** with a 6px graphite top edge: header (verdict, in-range count, riding style / frames / cadence), then two columns: adjustments and fit data on the left, gauges, snapshots and the crank chart on the right.
+
+"How it works" is five columns on one ruled line (a list under 1100px). "Why I built this" is the one graphite block, story left, scope list right with a tape-yellow tick per item. Left-aligned throughout.
+
+### Print / PDF
+The report prints as a document, not a screenshot: a letterhead (wordmark, site address, date), one column in reading order (adjustments, fit data, measurements, snapshots, chart), point-sized type, gauge rows always on one line, no page breaks inside a step, a gauge row or the chart, and the safety footer at the end. The riding-style switch prints as just the chosen style.
 
 ## Elevation & Depth
 
@@ -139,12 +144,12 @@ Flat. Depth comes from value steps (alloy → sheet → inset) and hairline rule
 
 ## Shapes
 
-Radius encodes role: video well and snapshots 4px (an instrument), controls 6px, sheets 10px, chips full pill. The gauge strip is 3px.
+Tooling radii only: video well, controls, sheets and the graphite block 4px; gauge strips, chips and tags 3px. No pills.
 
 ## Components
 
 ### Buttons
-White with a rule border; primary is tape yellow with a darker yellow edge and graphite text. Ghost buttons are transparent with a stronger outline. Disabled is a flat 5% graphite slab with no border, so it never reads like a ghost button.
+White with a 1.5px graphite outline; they fill graphite on hover and move 1px when pressed (not under reduced motion). Primary is tape yellow with the same graphite outline. Ghost buttons are transparent with a grey outline that turns graphite on hover. Disabled is a flat 5% graphite slab with no border.
 
 ### Tape gauge (signature)
 26px strip, off-white, ticks hanging from the top edge (major every five steps), target band in 55% tape yellow with darker yellow ends (open-ended targets lose that end), needle 3px in status colour. The needle sweeps in from the band centre once when the report appears (0.8s ease-out, staggered 40ms per row); reduced motion shows it in place.
@@ -167,6 +172,7 @@ Unchanged pedaling figure in overlay colours; its knee-angle tag is tape yellow 
 
 ### Don't:
 - Use yellow as text or as decoration.
-- Add shadows, gradient washes or cards inside sheets.
+- Add shadows, gradient washes, cards inside sheets, or white rounded cards on the alloy.
+- Add a second dark block; the story is the only one.
 - Join metadata with middle dots; use a small definition list.
 - Reintroduce ALL-CAPS labels, monospace data or `→` prefixes.
