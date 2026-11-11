@@ -371,6 +371,8 @@ input[aria-invalid="true"] { border-color: var(--bad); }
   display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 28px 64px; align-items: end;
   background: var(--ink); color: #fff; border-radius: 4px; padding: 40px 40px 44px;
 }
+/* Last thing on the page now that the footer line is gone. */
+#about { margin-bottom: 40px; }
 .about-story h2 { margin-bottom: 18px; }
 .about-story p { margin: 0 0 12px; max-width: 62ch; font-size: 17px; line-height: 1.6; color: #dde1e5; }
 .about-story p:last-child { margin-bottom: 0; }
