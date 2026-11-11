@@ -138,6 +138,9 @@ The report is a single **fit sheet** with a 6px graphite top edge: header (verdi
 ### Print / PDF
 The report prints as a document, not a screenshot: a letterhead (wordmark, site address, date), one column in reading order (adjustments, fit data, measurements, snapshots, chart), point-sized type, gauge rows always on one line, no page breaks inside a step, a gauge row or the chart, and the safety footer at the end. The riding-style switch prints as just the chosen style.
 
+### Share card
+"Share result" in the report opens a dialog with a 1080×1350 image drawn on a canvas in the browser (`share-card.js`): letterhead, the annotated snapshot in a black well (optional, a checkbox), the verdict, as many tape gauges as fit, and a graphite footer with the site address. Same palette and gauge geometry as the report. The image is shared through the system share sheet where the browser supports sharing files, and can always be downloaded.
+
 ## Elevation & Depth
 
 Flat. Depth comes from value steps (alloy → sheet → inset) and hairline rules, never shadows.

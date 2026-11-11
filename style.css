@@ -509,13 +509,28 @@ p, li, .help { text-wrap: pretty; }
   .foot { padding: 16px 16px 28px; }
 }
 
+/* ---------- Share card dialog ---------- */
+.share-dialog { width: min(520px, calc(100vw - 24px)); max-height: calc(100svh - 24px); padding: 22px 24px 24px; border: 0; border-top: 6px solid var(--ink); background: var(--sheet); color: var(--ink); overflow: auto; }
+.share-dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
+.share-dialog h2 { font-stretch: 75%; font-size: 30px; font-weight: 800; margin-bottom: 14px; }
+.share-dialog img { display: block; width: auto; max-width: 100%; height: auto; max-height: min(56svh, 600px); margin: 0 auto 14px; border: 1px solid var(--rule); }
+.share-dialog .check { margin-bottom: 8px; font-weight: 500; }
+.share-dialog .muted-note { font-size: 13.5px; }
+.share-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.share-actions .btn.ghost { margin-left: auto; }
+@media (max-width: 560px) {
+  .share-dialog { padding: 18px 16px 18px; }
+  .share-actions .btn { flex: 1 1 auto; min-height: 44px; display: flex; align-items: center; justify-content: center; }
+  .share-actions .btn.ghost { margin-left: 0; }
+}
+
 .print-head, .print-foot { display: none; }
 
 /* ---------- Print / PDF: the fit sheet as a document ---------- */
 @page { margin: 14mm 13mm 15mm; }
 @media print {
   body { background: #fff; font-size: 10pt; line-height: 1.45; }
-  .topbar, .intro, .layout, .report-actions, .about, .foot, .chart-tip, noscript { display: none !important; }
+  .topbar, .intro, .layout, .report-actions, .about, .foot, .chart-tip, .share-dialog, noscript { display: none !important; }
   .report { display: block !important; max-width: none; margin: 0; padding: 0; }
   .report-sheet { padding: 0; border-top: 0; }
   .report-sheet, .report-sheet * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }

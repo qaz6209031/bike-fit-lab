@@ -5,6 +5,7 @@ import { analyzeSession, liveRanges, rate, SCALE_SOURCES } from './analysis.js';
 import { drawOverlay, drawMessage, drawCalibration } from './draw.js';
 import { curveChart, mountCharts } from './chart.js';
 import { mountRiderDemo } from './rider-demo.js';
+import { gaugeScale, drawShareCard, canvasToBlob } from './share-card.js';
 import { t, getLang, setLang, onLangChange, applyStatic, LANGS, DICTS, PAGE_URLS } from './i18n.js';
 
 // Usage events for Google Analytics (no-op when GA is blocked or not loaded). Never send video or body data.
@@ -852,32 +853,12 @@ const noColon = (s) => s.replace(/[:：]\s*$/, '');
 
 /** A measurement laid on a strip of tape: ticks, the target band in yellow, the rider's value as the needle. */
 function gaugeHtml(m) {
-  const [lo, hi] = m.range;
-  const tol = m.tol || 5;
-  const v = Number.isFinite(m.value) ? m.value : null;
-  const bandLo = lo ?? hi - 4 * tol;
-  const bandHi = hi ?? lo + 4 * tol;
-  const pad = Math.max((bandHi - bandLo) * 0.5, tol * 1.5);
-  let min = bandLo - pad;
-  let max = bandHi + pad;
-  if (lo == null && (v == null || v >= 0)) min = Math.min(0, bandLo); // "≤ x" scales start at zero
-  if (v != null) {
-    min = Math.min(min, v - tol * 0.6);
-    max = Math.max(max, v + tol * 0.6);
-  }
-  const pct = (x) => ((x - min) / (max - min)) * 100;
-  const step = [0.5, 1, 2, 5, 10, 20].find((s) => (max - min) / s <= 30) ?? 20;
-  const ticks = [];
-  for (let x = Math.ceil(min / step) * step; x <= max; x += step) {
-    const major = Math.round(x / step) % 5 === 0;
-    const p = pct(x).toFixed(2);
-    ticks.push(`<line x1="${p}" x2="${p}" y1="0" y2="${major ? 11 : 6}"${major ? ' class="major"' : ''} vector-effect="non-scaling-stroke"/>`);
-  }
-  const left = lo == null ? 0 : pct(bandLo);
-  const right = hi == null ? 100 : pct(bandHi);
-  const band = `<span class="band${lo == null ? ' open-lo' : ''}${hi == null ? ' open-hi' : ''}" style="left:${left}%;width:${right - left}%"></span>`;
-  const needle =
-    v == null ? '' : `<span class="needle" style="left:${pct(v)}%;--from:${(left + right) / 2}%"></span>`;
+  const s = gaugeScale(m);
+  const ticks = s.ticks.map(
+    ({ p, major }) => `<line x1="${p.toFixed(2)}" x2="${p.toFixed(2)}" y1="0" y2="${major ? 11 : 6}"${major ? ' class="major"' : ''} vector-effect="non-scaling-stroke"/>`,
+  );
+  const band = `<span class="band${s.openLo ? ' open-lo' : ''}${s.openHi ? ' open-hi' : ''}" style="left:${s.left}%;width:${s.right - s.left}%"></span>`;
+  const needle = s.needle == null ? '' : `<span class="needle" style="left:${s.needle}%;--from:${(s.left + s.right) / 2}%"></span>`;
   return `<div class="gauge" aria-hidden="true">
       <svg class="ticks" viewBox="0 0 100 26" preserveAspectRatio="none">${ticks.join('')}</svg>${band}${needle}
     </div>`;
@@ -911,14 +892,94 @@ function captureWarningHtml() {
     </div>`;
 }
 
+// ---------- Share card ----------
+
+const share = { res: null, blob: null, url: null };
+
+/** Builds the dialog once; its words are refreshed every time it opens, so it follows the language. */
+function shareDialog() {
+  let d = $('shareDialog');
+  if (d) return d;
+  d = document.createElement('dialog');
+  d.id = 'shareDialog';
+  d.className = 'share-dialog';
+  d.setAttribute('aria-labelledby', 'shareTitle');
+  d.innerHTML = `<h2 id="shareTitle"></h2>
+    <img id="sharePreview" alt="" width="1080" height="1350" />
+    <label class="check" id="sharePhotoRow"><input type="checkbox" id="sharePhoto" checked /> <span id="sharePhotoLabel"></span></label>
+    <p class="muted-note" id="shareNote"></p>
+    <div class="share-actions">
+      <button class="btn primary" id="shareSend"></button>
+      <a class="btn" id="shareDownload" download="free-bike-fit.png"></a>
+      <button class="btn ghost" id="shareClose"></button>
+    </div>`;
+  document.body.append(d);
+  $('shareClose').onclick = () => d.close();
+  $('sharePhoto').onchange = renderShareCard;
+  $('shareDownload').onclick = () => track('share_card', { method: 'download', photo: $('sharePhoto').checked });
+  $('shareSend').onclick = async () => {
+    if (!share.blob) return;
+    const file = new File([share.blob], 'free-bike-fit.png', { type: 'image/png' });
+    try {
+      await navigator.share({ files: [file], text: t('share.text') });
+      track('share_card', { method: 'share', photo: $('sharePhoto').checked });
+    } catch { /* the rider closed the share sheet */ }
+  };
+  return d;
+}
+
+async function renderShareCard() {
+  const res = share.res;
+  if (!res) return;
+  const shot = $('sharePhoto').checked ? state.lastShots?.bottom ?? null : null;
+  const canvas = await drawShareCard({
+    ...verdictText(res), metrics: res.metrics, targetWord: t('report.colTarget'), cta: t('share.cta'), shot,
+  });
+  share.blob = await canvasToBlob(canvas);
+  if (share.url) URL.revokeObjectURL(share.url);
+  share.url = URL.createObjectURL(share.blob);
+  $('sharePreview').src = share.url;
+  $('shareDownload').href = share.url;
+  // The share sheet is offered only where the browser can hand over an image file.
+  const file = new File([share.blob], 'free-bike-fit.png', { type: 'image/png' });
+  $('shareSend').hidden = !navigator.canShare?.({ files: [file] });
+}
+
+async function openShare(res) {
+  share.res = res;
+  const d = shareDialog();
+  $('shareTitle').textContent = t('share.title');
+  $('sharePreview').alt = t('share.alt');
+  $('sharePhotoLabel').textContent = t('share.photo');
+  $('shareNote').textContent = t('share.note');
+  $('shareSend').textContent = t('share.send');
+  $('shareDownload').textContent = t('share.download');
+  $('shareClose').textContent = t('share.close');
+  $('sharePhotoRow').hidden = !state.lastShots?.bottom;
+  await renderShareCard();
+  if (!d.open) d.showModal();
+  track('share_card', { method: 'open' });
+}
+
+/** The verdict in words; the report head and the share card say the same thing. */
+function verdictText(res) {
+  const rated = res.metrics.filter((m) => m.status !== 'na');
+  const good = rated.filter((m) => m.status === 'good').length;
+  const n = res.suggestions.length;
+  return {
+    title: n === 0 ? t('verdict.allGood') : t('verdict.tweaks', { n }),
+    sub: n === 0 ? t('verdict.allGoodSub') : t('verdict.startWith', { area: res.suggestions[0].area }),
+    inRange: rated.length ? t('verdict.inRange', { good, n: rated.length }) : '',
+  };
+}
+
 function reportHeadHtml(res) {
   const rated = res.metrics.filter((m) => m.status !== 'na');
   const good = rated.filter((m) => m.status === 'good').length;
   const n = res.suggestions.length;
   const allGood = n === 0;
-  const title = allGood ? t('verdict.allGood') : t('verdict.tweaks', { n });
-  const sub = allGood ? t('verdict.allGoodSub') : t('verdict.startWith', { area: res.suggestions[0].area });
-  const inRange = rated.length ? ` <span class="in-range">${t('verdict.inRange', { good, n: rated.length })}</span>` : '';
+  const { title, sub, inRange: inRangeText } = verdictText(res);
+  const inRange = inRangeText ? ` <span class="in-range">${inRangeText}</span>` : '';
   // Riding style only changes target ranges, so it is chosen here, after the measurements, and re-scores instantly.
   const styleSwitch = `<span class="unit-switch style-switch" role="group" aria-label="${t('report.metaStyle')}">${STYLES_ORDER.map(
     (k) => `<button type="button" data-style="${k}" aria-pressed="${k === state.style}" title="${t(`style.${k}`)}">${t(`styleShort.${k}`)}</button>`,
@@ -1019,12 +1080,14 @@ function renderReport({ scroll = true } = {}) {
       </div>
     </div>
     <div class="report-actions">
+      <button class="btn primary" id="btnShare">${t('report.share')}</button>
       <button class="btn" id="btnPrint">${t('report.print')}</button>
       <span id="recordingSlot"></span>
     </div>
     <p class="print-foot">${t('footer')}</p>
   </div>`;
   $('btnPrint').onclick = () => window.print();
+  $('btnShare').onclick = () => openShare(res);
   mountCharts(el);
   addRecordingLink();
   reveal();
