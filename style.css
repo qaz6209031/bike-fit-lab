@@ -296,18 +296,19 @@ input[aria-invalid="true"] { border-color: var(--bad); }
 /* The signature: every measurement laid on a strip of tape. Target band in yellow, your value as the needle. */
 .gauges { list-style: none; margin: 0; padding: 0; }
 .gauge-row {
-  display: grid; grid-template-columns: minmax(0, 1fr) 84px minmax(0, 1.25fr); gap: 4px 16px; align-items: center;
+  display: grid; grid-template-columns: minmax(0, 1fr) 92px minmax(0, 1.25fr); gap: 4px 16px; align-items: center;
   padding: 12px 0; border-top: 1px solid var(--rule);
 }
 .gauge-row:first-child { border-top: 0; padding-top: 2px; }
 .g-name h4 { font-size: 15px; font-weight: 600; }
 .g-name .help { margin: 1px 0 0; font-size: 13px; color: var(--muted); line-height: 1.4; }
-.g-value { margin: 0; text-align: right; font-size: 32px; font-weight: 850; white-space: nowrap; }
+/* A long unit ("% of thigh") drops under its number instead of running into the tape. */
+.g-value { margin: 0; text-align: right; font-size: 32px; font-weight: 850; line-height: 1; }
 .s-good .g-value { color: var(--good); }
 .s-close .g-value { color: var(--close); }
 .s-bad .g-value { color: var(--bad); }
 .s-na .g-value { color: var(--muted); }
-.g-value small { font-size: 14px; font-weight: 600; font-stretch: 100%; color: var(--muted); }
+.g-value small { display: inline-block; font-size: 14px; font-weight: 600; font-stretch: 100%; line-height: 1.3; color: var(--muted); white-space: nowrap; }
 .gauge { position: relative; height: 26px; background: #fbfbfa; border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; }
 .gauge .ticks { position: absolute; inset: 0; width: 100%; height: 100%; }
 .gauge .ticks line { stroke: #a3aab2; stroke-width: 1; }
